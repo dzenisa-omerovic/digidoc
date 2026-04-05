@@ -1,0 +1,121 @@
+<div class="templates-page">
+  <div class="templates-shell">
+    <section class="templates-header">
+      <div class="title-block">
+        <h1>Biblioteka sablona</h1>
+        <p>Pregledajte, pretrazite i otvorite dokumente bez praznog i neurednog prikaza.</p>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-box">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="text"
+            [(ngModel)]="searchQuery"
+            placeholder="Pretrazi sablone..." />
+        </div>
+
+        <button
+          pButton
+          label="Novi sablon"
+          icon="pi pi-plus-circle"
+          class="create-button"
+          routerLink="/create-template"></button>
+      </div>
+    </section>
+
+    <section class="overview-bar">
+      <div class="overview-card">
+        <span class="overview-label">Ukupno prikazano</span>
+        <strong>{{ loading ? '...' : getTemplateCountLabel(filteredTemplates.length) }}</strong>
+      </div>
+
+      <div class="overview-card">
+        <span class="overview-label">Status</span>
+        <strong>{{ loading ? 'Ucitavanje...' : 'Spremno za rad' }}</strong>
+      </div>
+    </section>
+
+    @if (loading) {
+      <div class="templates-grid">
+        @for (placeholder of [1, 2, 3, 4, 5, 6]; track placeholder) {
+          <article class="template-card skeleton-card">
+            <div class="skeleton-line skeleton-icon"></div>
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-text"></div>
+            <div class="skeleton-line skeleton-text short"></div>
+            <div class="skeleton-footer">
+              <div class="skeleton-line skeleton-date"></div>
+              <div class="skeleton-actions">
+                <div class="skeleton-circle"></div>
+                <div class="skeleton-circle"></div>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    } @else if (loadError) {
+      <section class="empty-state">
+        <div class="empty-illustration">
+          <i class="pi pi-exclamation-triangle"></i>
+        </div>
+        <h2>Ucitavanje nije uspelo</h2>
+        <p>Frontend je pokusao da dobije sablone, ali `api/Template` nije odgovorio kako treba.</p>
+        <button pButton label="Pokusaj ponovo" icon="pi pi-refresh" class="create-button" (click)="loadTemplates()"></button>
+      </section>
+    } @else if (filteredTemplates.length > 0) {
+      <div class="templates-grid">
+        @for (item of filteredTemplates; track item.id) {
+          <article class="template-card">
+            <div class="card-top">
+              <div class="card-icon">
+                <i class="pi pi-file-edit"></i>
+              </div>
+              <p-tag [value]="item.fields.length + ' polja'" [rounded]="true" severity="secondary"></p-tag>
+            </div>
+
+            <div class="card-content">
+              <h2>{{ item.name }}</h2>
+              <p>{{ item.description || 'Ovaj sablon jos nema dodatni opis.' }}</p>
+            </div>
+
+            <div class="card-meta">
+              <span>
+                <i class="pi pi-calendar"></i>
+                {{ item.createdAt | date:'dd.MM.yyyy' }}
+              </span>
+            </div>
+
+            <div class="card-actions">
+              <button
+                pButton
+                icon="pi pi-file-edit"
+                class="p-button-text action-button fill-button"
+                pTooltip="Popuni sablon"
+                tooltipPosition="bottom"
+                [routerLink]="['/template', item.id, 'fill']"></button>
+              
+              <button
+                pButton
+                icon="pi pi-pencil"
+                class="p-button-text action-button"
+                pTooltip="Uredi sablon"
+                tooltipPosition="bottom"
+                [routerLink]="['/edit-template', item.id]"></button>
+            </div>
+          </article>
+        }
+      </div>
+    } @else {
+      <section class="empty-state">
+        <div class="empty-illustration">
+          <i class="pi pi-folder-open"></i>
+        </div>
+        <h2>Nema rezultata</h2>
+        <p>Probajte drugu pretragu ili kreirajte novi sablon koji ce se odmah pojaviti u biblioteci.</p>
+        <button pButton label="Kreiraj sablon" icon="pi pi-plus" class="create-button" routerLink="/create-template"></button>
+      </section>
+    }
+  </div>
+</div>

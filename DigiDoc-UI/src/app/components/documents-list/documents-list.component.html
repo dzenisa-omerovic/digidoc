@@ -1,0 +1,45 @@
+<div class="documents-container">
+  <div class="header-section">
+    <div>
+      <h1 class="page-title">Vaši dokumenti</h1>
+      <p class="page-subtitle">Pregled i upravljanje svim sačuvanim dokumentima</p>
+    </div>
+    <button pButton icon="pi pi-plus" class="p-button-primary" label="Novi dokument" routerLink="/create-blank-document"></button>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+    <p>Učitavanje dokumenata...</p>
+  </div>
+
+  <div *ngIf="error" class="error-state">
+    <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #ef4444;"></i>
+    <p>{{ error }}</p>
+    <button pButton label="Pokušaj ponovo" class="p-button-outlined" (click)="loadDocuments()"></button>
+  </div>
+
+  <div *ngIf="!loading && !error && documents.length === 0" class="empty-state">
+    <i class="pi pi-folder-open empty-icon"></i>
+    <h3>Nemate sačuvanih dokumenata</h3>
+    <p>Kreirajte vaš prvi dokument iz šablona ili kao potpuno nov prazan dokument.</p>
+    <button pButton label="Kreiraj prazan dokument" routerLink="/create-blank-document" class="p-button-primary p-button-outlined mt-3"></button>
+  </div>
+
+  <div *ngIf="!loading && !error && documents.length > 0" class="documents-grid">
+    <div class="document-card" *ngFor="let doc of documents" (click)="openDocument(doc.id)">
+      <div class="card-icon">
+        <i class="pi pi-file"></i>
+      </div>
+      <div class="card-content">
+        <h3 class="card-title">{{ doc.title }}</h3>
+        <p class="card-description">{{ doc.description || 'Nema opisa' }}</p>
+      </div>
+      <div class="card-footer">
+        <span class="card-date" *ngIf="doc.createdAt">
+          <i class="pi pi-calendar"></i> {{ doc.createdAt | date:'dd.MM.yyyy.' }}
+        </span>
+        <button pButton icon="pi pi-eye" class="p-button-text p-button-rounded p-button-sm view-btn" title="Pogledaj"></button>
+      </div>
+    </div>
+  </div>
+</div>

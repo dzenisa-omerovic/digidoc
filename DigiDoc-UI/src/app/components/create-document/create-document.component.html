@@ -1,0 +1,178 @@
+<div class="document-page">
+  <div class="document-shell">
+    @if (loading) {
+      <section class="document-header skeleton-block">
+        <div class="skeleton-title"></div>
+        <div class="skeleton-subtitle"></div>
+      </section>
+
+      <section class="document-stage skeleton-card">
+        <div class="skeleton-paper"></div>
+      </section>
+    } @else if (template) {
+      <section class="document-header">
+        <div class="header-copy">
+          <span class="eyebrow">Dokument pregled</span>
+          <h1>{{ template.name }}</h1>
+          <p>{{ template.description || 'Pregledajte sablon kao gotov dokument i popunite polja kroz dijalog.' }}</p>
+        </div>
+
+        <div class="header-actions">
+          <button
+            pButton
+            label="Nazad na detalje"
+            icon="pi pi-arrow-left"
+            class="p-button-text secondary-action"
+            [routerLink]="['/template', template.id]"></button>
+          <button
+            pButton
+            label="Popuni dokument"
+            icon="pi pi-pen-to-square"
+            class="primary-action"
+            (click)="openFillDialog()"></button>
+        </div>
+      </section>
+
+      <section class="document-stage">
+        <div class="stage-topbar">
+          <div class="stage-status">
+            <span>{{ pages.length }} strana{{ pages.length === 1 ? '' : 'e' }}</span>
+            <span *ngIf="matchedPlaceholderCount > 0">{{ matchedPlaceholderCount }} placeholder mesta</span>
+          </div>
+
+          @if (spreads.length > 1) {
+            <div class="stage-navigation">
+              <button
+                pButton
+                type="button"
+                icon="pi pi-chevron-left"
+                class="p-button-text nav-button"
+                [disabled]="currentSpreadIndex === 0"
+                (click)="previousSpread()"></button>
+              <span>Prikaz {{ currentSpreadIndex + 1 }} / {{ spreads.length }}</span>
+              <button
+                pButton
+                type="button"
+                icon="pi pi-chevron-right"
+                class="p-button-text nav-button"
+                [disabled]="currentSpreadIndex === spreads.length - 1"
+                (click)="nextSpread()"></button>
+            </div>
+          }
+        </div>
+
+        <div class="spread-window">
+          <div class="spread-track" [style.transform]="'translateX(-' + (currentSpreadIndex * 100) + '%)'">
+            @for (spread of spreads; track $index) {
+              <div class="document-spread">
+                @for (page of spread; track $index) {
+                  <article class="preview-paper">
+                    <div class="paper-meta">
+                      <span class="paper-draft">DigiDoc preview</span>
+                      <span class="paper-date">{{ template.createdAt | date:'dd.MM.yyyy' }}</span>
+                    </div>
+                    <h3>{{ template.name }}</h3>
+                    <div class="preview-render" [innerHTML]="page"></div>
+                  </article>
+                }
+
+                @if (spread.length === 1) {
+                  <article class="preview-paper empty-paper">
+                    <div class="paper-shadow-text">Sledeca strana</div>
+                  </article>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="document-footer">
+          <button
+            pButton
+            label="Izvezi u XML"
+            icon="pi pi-code"
+            class="p-button-text secondary-action"
+            (click)="exportXml()"></button>
+          <button
+            pButton
+            label="Izvezi u PDF"
+            icon="pi pi-file-pdf"
+            class="p-button-text secondary-action"
+            (click)="exportPdf()"></button>
+          <button
+            pButton
+            label="Resetuj dokument"
+            icon="pi pi-refresh"
+            class="p-button-text secondary-action"
+            (click)="resetForm()"></button>
+          <button
+            pButton
+            label="Sacuvaj dokument"
+            icon="pi pi-save"
+            class="primary-action"
+            [disabled]="saving"
+            (click)="saveDocument()"></button>
+        </div>
+
+        <div class="status-row" *ngIf="saveSuccess || saveError">
+          <span class="status-message success" *ngIf="saveSuccess">{{ saveSuccess }}</span>
+          <span class="status-message error" *ngIf="saveError">{{ saveError }}</span>
+        </div>
+      </section>
+
+      <p-dialog
+        [(visible)]="fillDialogVisible"
+        [modal]="true"
+        [draggable]="false"
+        [resizable]="false"
+        [style]="{ width: 'min(720px, 92vw)' }"
+        styleClass="fill-dialog"
+        header="Popuni dokument">
+        <div class="dialog-intro">
+          <p>Unesite vrednosti za dinamicna polja. Ako ih ima mnogo, forma je skrolabilna.</p>
+        </div>
+
+        @if (template.fields.length > 0) {
+          <form [formGroup]="form" class="dialog-fields">
+            @for (field of template.fields; track field.id ?? field.name) {
+              <div class="field-card">
+                <label [for]="'dialog-' + field.name">{{ field.label }}</label>
+                <input
+                  [id]="'dialog-' + field.name"
+                  pInputText
+                  [type]="getInputType(field)"
+                  [formControlName]="field.name"
+                  [placeholder]="getPlaceholder(field)" />
+                @if (hasFieldError(field.name)) {
+                  <small class="field-error">Ovo polje je obavezno.</small>
+                }
+                <small class="field-hint">Identifikator: <strong>{{ field.name }}</strong></small>
+              </div>
+            }
+          </form>
+        } @else {
+          <div class="empty-fields">
+            <i class="pi pi-inbox"></i>
+            <p>Ovaj sablon nema definisana polja za unos.</p>
+          </div>
+        }
+
+        <ng-template pTemplate="footer">
+          <div class="dialog-actions">
+            <button pButton type="button" label="Zatvori" class="p-button-text secondary-action" (click)="closeFillDialog()"></button>
+            <button pButton type="button" label="Sacuvaj dokument" icon="pi pi-save" class="primary-action" [disabled]="saving" (click)="saveDocument()"></button>
+          </div>
+        </ng-template>
+      </p-dialog>
+    } @else {
+      <section class="empty-state">
+        <div class="empty-icon">
+          <i class="pi pi-file"></i>
+        </div>
+        <h2>Sablon nije dostupan</h2>
+        <p>Izgleda da trazeni sablon ne postoji ili trenutno ne moze da se ucita.</p>
+        <button pButton label="Nazad na sablone" icon="pi pi-arrow-left" class="primary-action" routerLink="/templates"></button>
+      </section>
+    }
+  </div>
+</div>

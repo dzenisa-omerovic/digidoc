@@ -1,0 +1,106 @@
+<div class="document-edit-page">
+  <div class="top-bar">
+    <div>
+      <h1>Uredjivanje dokumenta</h1>
+      <p>Svako cuvanje pravi novu verziju dokumenta.</p>
+    </div>
+    <div class="actions">
+      <button pButton type="button" label="Nazad na dokument" class="p-button-outlined" icon="pi pi-eye" (click)="openDocument()"></button>
+      <button pButton type="button" label="Sacuvaj novu verziju" icon="pi pi-save" [loading]="saving" (click)="saveChanges()"></button>
+    </div>
+  </div>
+
+  <div class="state-box" *ngIf="loading">
+    <i class="pi pi-spin pi-spinner"></i>
+    <span>Ucitavanje dokumenta i verzija...</span>
+  </div>
+
+  <div class="state-box error" *ngIf="!loading && error">
+    <i class="pi pi-exclamation-triangle"></i>
+    <span>{{ error }}</span>
+  </div>
+
+  <div class="content-grid" *ngIf="!loading && !error">
+    <section class="editor-panel">
+      <label for="docTitle">Naziv</label>
+      <input id="docTitle" type="text" [(ngModel)]="documentTitle" />
+
+      <label for="docDescription">Opis</label>
+      <input id="docDescription" type="text" [(ngModel)]="documentDescription" />
+
+      <label>Sadrzaj dokumenta</label>
+      <p-editor
+        [(ngModel)]="editorContent"
+        [modules]="editorModules"
+        [style]="{ height: '440px' }"
+        (onInit)="onEditorInit($event)"
+        (ngModelChange)="onEditorContentChange($event)">
+      </p-editor>
+    </section>
+
+    <section class="compare-panel">
+      <div class="compare-header">
+        <h2>Poredjenje verzija</h2>
+        <p>Levo i desno mozes otvoriti dve verzije i odmah videti razlike.</p>
+      </div>
+
+      <div class="selectors">
+        <div>
+          <label for="leftVersion">Leva verzija</label>
+          <select id="leftVersion" [(ngModel)]="selectedLeftVersionId" (change)="onVersionSelectionChange()">
+            <option [ngValue]="undefined" disabled>Izaberi verziju</option>
+            <option *ngFor="let version of versions; trackBy: trackByVersionId" [ngValue]="version.id">
+              {{ versionLabel(version) }}
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <label for="rightVersion">Desna verzija</label>
+          <select id="rightVersion" [(ngModel)]="selectedRightVersionId" (change)="onVersionSelectionChange()">
+            <option [ngValue]="undefined" disabled>Izaberi verziju</option>
+            <option *ngFor="let version of versions; trackBy: trackByVersionId" [ngValue]="version.id">
+              {{ versionLabel(version) }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="compare-columns">
+        <article class="version-card">
+          <h3>Leva strana</h3>
+          <div class="version-html" [innerHTML]="leftPreview"></div>
+        </article>
+
+        <article class="version-card">
+          <h3>Desna strana</h3>
+          <div class="version-html" [innerHTML]="rightPreview"></div>
+        </article>
+      </div>
+
+      <div class="diff-summary">
+        <div>
+          <h4>Dodato u desnoj verziji</h4>
+          <ul *ngIf="addedLines.length > 0; else noAdded">
+            <li *ngFor="let line of addedLines">{{ line }}</li>
+          </ul>
+          <ng-template #noAdded>
+            <p>Nema novih linija.</p>
+          </ng-template>
+        </div>
+
+        <div>
+          <h4>Uklonjeno iz leve verzije</h4>
+          <ul *ngIf="removedLines.length > 0; else noRemoved">
+            <li *ngFor="let line of removedLines">{{ line }}</li>
+          </ul>
+          <ng-template #noRemoved>
+            <p>Nema uklonjenih linija.</p>
+          </ng-template>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<p-toast></p-toast>

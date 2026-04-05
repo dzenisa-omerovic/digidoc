@@ -1,0 +1,135 @@
+
+.page-wrapper {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 900px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  padding: 3rem;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #334155;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+.description { color: #64748b; text-align: center; margin-bottom: 2.5rem; }
+
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+@media (min-width: 768px) { .form-grid { grid-template-columns: 1fr 1fr; gap: 0rem 2.5rem; } }
+
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+::ng-deep .p-inputtext, ::ng-deep .p-password, ::ng-deep .p-password input, ::ng-deep .p-datepicker { width: 100% !important; }
+
+.position-relative {
+  position: relative;
+}
+
+.floating-requirements {
+  list-style: none;
+  padding: 1rem;
+  margin: 0;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  position: absolute;
+  top: calc(100% - 1.5rem);
+  margin-top: 4px;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+}
+
+.floating-requirements li {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.floating-requirements li i { font-size: 0.8rem; font-weight: bold; }
+.floating-requirements li.valid { color: #10b981; font-weight: 600; }
+.floating-requirements li.valid i.pi-check { color: #10b981; }
+.floating-requirements li i.pi-times { color: #94a3b8; }
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  margin-bottom: 0.75rem;
+  padding-bottom: 1.5rem;
+  position: relative;
+}
+
+.p-error {
+  color: #ef4444;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: left;
+  position: absolute;
+  bottom: 0.2rem;
+  left: 0;
+}
+
+.gender-group {
+  margin-bottom: 0.75rem;
+  padding-bottom: 1.5rem;
+  position: relative;
+}
+
+.button-container { margin-top: 1rem; border-top: 4px solid #f1f5f9; padding-top: 2rem; }
+::ng-deep .button-container .p-button { width: 100%; justify-content: center; padding: 1rem; border-radius: 8px; font-weight: 600; font-size: 1.1rem; }
+.radio-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  height: 40px;
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-group .radio-label {
+  margin-bottom: 0 !important;
+  display: inline-flex !important;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 500;
+  color: #475569;
+  line-height: 1;
+}
+
+::ng-deep p-radiobutton {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}

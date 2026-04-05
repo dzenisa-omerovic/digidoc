@@ -1,0 +1,49 @@
+<main class="home-shell">
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Digitalna dokumentacija za timove</p>
+      <h1>DigiDoc ubrzava izradu sablona i izvoz dokumenata bez haosa.</h1>
+      <p class="subtitle">
+        Dizajniraj sablon, popuni podatke kroz dinamicna polja i izvezi dokument u PDF ili XML
+        uz tok koji je pregledan i dosledan.
+      </p>
+
+      <div class="hero-actions">
+        <a href="/create-template" class="btn btn-primary" (click)="navigateWithAuth($event, '/create-template')">
+          Napravi sablon
+        </a>
+        <a href="/templates" class="btn btn-ghost" (click)="navigateWithAuth($event, '/templates')">
+          Pregledaj sablone
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-card">
+      <p class="card-title">Tok rada</p>
+      <ol>
+        <li>Kreiraj strukturu dokumenta sa placeholderima</li>
+        <li>Dodaj dinamicka polja i tipove vrednosti</li>
+        <li>Popuni dokument i preuzmi PDF / XML</li>
+      </ol>
+      <a href="/login" class="inline-link" (click)="navigateToLoginOrAccount($event)">Prijavi se za nastavak</a>
+    </div>
+  </section>
+
+  <section class="highlights">
+    @for (item of highlights; track item.title) {
+      <article class="feature-card">
+        <i [class]="item.icon"></i>
+        <h2>{{ item.title }}</h2>
+        <p>{{ item.description }}</p>
+      </article>
+    }
+  </section>
+
+  <section class="footer-cta">
+    <h3>Spremno za rad na pravim dokumentima</h3>
+    <p>
+      Fokus je na brzini, doslednosti i lakom odrzavanju sablona kroz ceo zivotni ciklus dokumentacije.
+    </p>
+    <a routerLink="/register" class="btn btn-primary">Kreiraj nalog</a>
+  </section>
+</main>

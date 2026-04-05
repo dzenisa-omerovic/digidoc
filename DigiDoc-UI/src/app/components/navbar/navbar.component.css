@@ -1,0 +1,127 @@
+
+.modern-menubar-wrapper {
+  position: sticky;
+  top: 15px;
+  z-index: 1000;
+  padding: 0 1rem;
+}
+
+
+::ng-deep .p-menubar {
+  background: rgba(255, 255, 255, 0.93) !important;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(0, 0, 0, 0.03) !important;
+  border-radius: 20px !important;
+  padding: 0.9rem 2.5rem !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  display: flex;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.logo-icon {
+  font-size: 1.6rem;
+}
+
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  letter-spacing: -0.8px;
+}
+
+.custom-nav-items {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.nav-item {
+  text-decoration: none;
+  color: #555;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 8px 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-item i {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.nav-item::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2.5px;
+  bottom: 0;
+  left: 50%;
+  background-color: #e76f51;
+  transition: width 0.3s ease, left 0.3s ease;
+  border-radius: 2px;
+}
+
+.nav-item:hover {
+  color: #e76f51;
+}
+
+.nav-item:hover i {
+  opacity: 1;
+  color: #e76f51;
+  transform: translateY(-1px);
+  transition: all 0.3s ease;
+}
+
+.nav-item:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+::ng-deep .p-menuitem-link:hover {
+  background: transparent !important;
+}
+::ng-deep .p-menubar .p-menuitem.p-highlight > .p-menuitem-link {
+  background: transparent !important;
+}
+.logo-text {
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+
+  background: linear-gradient(
+    to right,
+    #0052D4,
+    #FF8C00,
+    #FFA500,
+    #0052D4
+  );
+  background-size: 200% auto;
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  animation: gradientShift 3s linear infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+:host ::ng-deep .logout-item {
+  cursor: pointer !important;
+}
+.logout-item {
+  cursor: pointer;
+}

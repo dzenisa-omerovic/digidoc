@@ -1,0 +1,131 @@
+<div class="word-layout">
+  <p-toast></p-toast>
+
+  <div class="word-header">
+    <div class="header-left">
+      <div class="document-info">
+        <input type="text" [(ngModel)]="documentTitle" placeholder="Ime dokumenta" class="doc-title-input" />
+        <input type="text" [(ngModel)]="documentDescription" placeholder="Opciona napomena..." class="doc-desc-input" />
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button pButton label="Zavrsi i sacuvaj" icon="pi pi-save" class="primary-action" (click)="saveDocument()"></button>
+    </div>
+  </div>
+
+  <div class="editor-toolbar-shell">
+    <div id="blank-doc-toolbar" class="editor-toolbar-row ql-snow ql-toolbar">
+      <span class="toolbar-custom-actions">
+        <button type="button" class="toolbar-action" (click)="insertQuote()">
+          <i class="pi pi-at"></i>
+          Citat
+        </button>
+        <button type="button" class="toolbar-action" (click)="addFloatingTextBox()">
+          <i class="pi pi-stop"></i>
+          Text Box
+        </button>
+        <button type="button" class="toolbar-action" (click)="insertTableBlock()">
+          <i class="pi pi-table"></i>
+          Tabela
+        </button>
+      </span>
+
+      <span class="ql-formats">
+        <select class="ql-header">
+          <option selected></option>
+          <option value="1"></option>
+          <option value="2"></option>
+          <option value="3"></option>
+        </select>
+        <select class="ql-font">
+          <option selected></option>
+          <option value="serif"></option>
+          <option value="monospace"></option>
+        </select>
+        <select class="ql-size">
+          <option value="small"></option>
+          <option selected></option>
+          <option value="large"></option>
+          <option value="huge"></option>
+        </select>
+      </span>
+      <span class="ql-formats">
+        <button type="button" class="ql-bold"></button>
+        <button type="button" class="ql-italic"></button>
+        <button type="button" class="ql-underline"></button>
+        <button type="button" class="ql-strike"></button>
+      </span>
+      <span class="ql-formats">
+        <select class="ql-color"></select>
+        <select class="ql-background"></select>
+      </span>
+      <span class="ql-formats">
+        <button type="button" class="ql-align" value=""></button>
+        <button type="button" class="ql-align" value="center"></button>
+        <button type="button" class="ql-align" value="right"></button>
+        <button type="button" class="ql-align" value="justify"></button>
+      </span>
+      <span class="ql-formats">
+        <button type="button" class="ql-list" value="ordered"></button>
+        <button type="button" class="ql-list" value="bullet"></button>
+        <button type="button" class="ql-indent" value="-1"></button>
+        <button type="button" class="ql-indent" value="+1"></button>
+      </span>
+      <span class="ql-formats">
+        <button type="button" class="ql-blockquote"></button>
+        <button type="button" class="ql-image"></button>
+        <button type="button" class="ql-clean"></button>
+      </span>
+    </div>
+  </div>
+
+  <div class="word-workspace">
+    <div
+      class="a4-page-container"
+      [style.--textbox-top-offset.px]="textFlowTopOffset"
+      [style.--textbox-left-offset.px]="textFlowLeftOffset"
+      [style.--textbox-right-offset.px]="textFlowRightOffset">
+      <p-editor
+        [(ngModel)]="editorContent"
+        (ngModelChange)="onEditorContentChange($event)"
+        [modules]="editorModules"
+        [style]="{'min-height':'1056px', 'border': 'none', 'padding': '0'}"
+        placeholder="Zapocnite kucanje ovde..."
+        (onInit)="onEditorInit($event)">
+      </p-editor>
+
+      <div class="floating-layer" #floatingLayer [style.height.px]="textBoxZoneHeight">
+        @for (box of floatingTextBoxes; track box.id) {
+          <div
+            class="floating-textbox"
+            [class.active]="activeTextBoxId === box.id"
+            [style.left.px]="box.x"
+            [style.top.px]="box.y"
+            [style.width.px]="box.width"
+            [style.height.px]="box.height"
+            (mousedown)="activeTextBoxId = box.id"
+            (pointerdown)="startDragFromBox($event, box.id)">
+
+            <textarea
+              class="floating-body"
+              [ngModel]="box.text"
+              (ngModelChange)="updateTextBoxText(box.id, $event)"
+              placeholder="Unesite tekst">
+            </textarea>
+
+            <button type="button" class="resize-handle" (pointerdown)="startResize($event, box.id)"></button>
+            <span class="selection-handle tl"></span>
+            <span class="selection-handle tc"></span>
+            <span class="selection-handle tr"></span>
+            <span class="selection-handle ml"></span>
+            <span class="selection-handle mr"></span>
+            <span class="selection-handle bl"></span>
+            <span class="selection-handle bc"></span>
+            <span class="selection-handle br"></span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

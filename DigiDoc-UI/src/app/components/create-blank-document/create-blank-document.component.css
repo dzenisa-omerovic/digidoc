@@ -1,0 +1,330 @@
+﻿.word-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 80px);
+  background: #f3f4f6;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  margin-top: 20px;
+}
+
+.word-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1.5rem;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.back-btn {
+  color: #6b7280;
+}
+
+.document-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.doc-title-input {
+  border: none;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: transparent;
+  outline: none;
+  min-width: 300px;
+}
+
+.doc-title-input:hover,
+.doc-title-input:focus {
+  background: #f3f4f6;
+}
+
+.doc-desc-input {
+  border: none;
+  font-size: 0.85rem;
+  color: #6b7280;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: transparent;
+  outline: none;
+}
+
+.doc-desc-input:hover,
+.doc-desc-input:focus {
+  background: #f3f4f6;
+}
+
+:host ::ng-deep .primary-action.p-button {
+  background: #2563eb;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1.2rem;
+  font-weight: 500;
+}
+
+:host ::ng-deep .primary-action.p-button:hover {
+  background: #1d4ed8;
+}
+
+.editor-toolbar-shell {
+  padding: 0.35rem 1.5rem 0.45rem;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.editor-toolbar-row {
+  width: min(1600px, calc(100vw - 3rem));
+  margin: 0 auto;
+  border: 1px solid #d9dee7;
+  border-radius: 10px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  overflow: visible;
+  white-space: normal;
+  padding: 0.45rem 0.6rem;
+  gap: 0.45rem;
+}
+
+.editor-toolbar-row > * {
+  flex: 0 0 auto;
+}
+
+.toolbar-custom-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding-right: 0.9rem;
+  margin-right: 0.9rem;
+  border-right: 1px solid #e5e7eb;
+}
+
+.toolbar-action {
+  border: 1px solid #d1d5db;
+  background: #f8fafc;
+  color: #1f2937;
+  border-radius: 7px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.42rem 0.72rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.toolbar-action:hover {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+:host ::ng-deep .editor-toolbar-row.ql-toolbar button.toolbar-action {
+  width: auto !important;
+  height: auto !important;
+  float: none !important;
+  padding: 0.42rem 0.72rem !important;
+}
+
+:host ::ng-deep .editor-toolbar-row .ql-formats {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  margin-right: 0.45rem;
+  padding-right: 0.45rem;
+  border-right: 1px solid #edf1f6;
+}
+
+:host ::ng-deep .editor-toolbar-row .ql-formats:last-child {
+  border-right: none;
+  margin-right: 0;
+  padding-right: 0;
+}
+
+:host ::ng-deep .editor-toolbar-row .ql-picker {
+  font-size: 0.85rem;
+}
+
+.editor-toolbar-shell {
+  overflow: visible;
+  overflow-y: visible;
+}
+
+:host ::ng-deep .editor-toolbar-row .ql-picker {
+  z-index: 20;
+}
+
+:host ::ng-deep .editor-toolbar-row .ql-picker-options {
+  z-index: 9999;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.word-workspace {
+  flex: 1;
+  padding: 0.75rem 0 3rem;
+  display: flex;
+  justify-content: center;
+}
+
+.a4-page-container {
+  width: 21cm;
+  min-height: 29.7cm;
+  background: #ffffff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.04);
+  margin: 0 auto;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  --textbox-top-offset: 0px;
+  --textbox-left-offset: 0px;
+  --textbox-right-offset: 0px;
+}
+
+:host ::ng-deep .a4-page-container .p-editor-container {
+  border: none !important;
+}
+
+:host ::ng-deep .a4-page-container .p-editor-toolbar {
+  display: none !important;
+}
+
+:host ::ng-deep .a4-page-container .p-editor-content {
+  border: none !important;
+}
+
+:host ::ng-deep .a4-page-container .p-editor-content .ql-editor {
+  padding:
+    calc(2.5cm + var(--textbox-top-offset))
+    calc(2.5cm + var(--textbox-right-offset))
+    2.5cm
+    calc(2.5cm + var(--textbox-left-offset)) !important;
+  font-family: "Times New Roman", serif;
+  font-size: 12pt;
+  line-height: 1.5;
+  color: #000000;
+  min-height: 29.7cm;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+:host ::ng-deep .a4-page-container .p-editor-content .ql-editor.ql-blank::before {
+  left: 2.5cm;
+  font-style: normal;
+  color: #9ca3af;
+}
+
+:host ::ng-deep .a4-page-container .p-editor-content .ql-editor .custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+:host ::ng-deep .a4-page-container .p-editor-content .ql-editor .custom-table td,
+:host ::ng-deep .a4-page-container .p-editor-content .ql-editor .custom-table th {
+  border: 1px solid #d1d5db;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.floating-layer {
+  position: absolute;
+  top: 2.5cm;
+  left: 2.5cm;
+  right: 2.5cm;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.floating-textbox {
+  position: absolute;
+  border: 1px solid #000000;
+  background: #ffffff;
+  border-radius: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  will-change: transform, width, height;
+  cursor: move;
+}
+
+.floating-textbox.active {
+  border-color: #000000;
+  box-shadow: 0 0 0 1px #000000;
+}
+
+.floating-body {
+  flex: 1;
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  padding: 0.55rem;
+  font-size: 0.96rem;
+  line-height: 1.45;
+  font-family: "Times New Roman", serif;
+  cursor: text;
+}
+
+.resize-handle {
+  position: absolute;
+  right: -7px;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #666;
+  border-radius: 999px;
+  background: #ffffff;
+  cursor: nwse-resize;
+  z-index: 3;
+}
+
+.selection-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #666;
+  border-radius: 50%;
+  background: #ffffff;
+  pointer-events: none;
+}
+
+.selection-handle.tl { top: -6px; left: -6px; }
+.selection-handle.tc { top: -6px; left: calc(50% - 5px); }
+.selection-handle.tr { top: -6px; right: -6px; }
+.selection-handle.ml { top: calc(50% - 5px); left: -6px; }
+.selection-handle.mr { top: calc(50% - 5px); right: -6px; }
+.selection-handle.bl { bottom: -6px; left: -6px; }
+.selection-handle.bc { bottom: -6px; left: calc(50% - 5px); }
+.selection-handle.br { bottom: -6px; right: -6px; }
+
+.floating-textbox:not(.active) .selection-handle {
+  opacity: 0;
+}
+
+@media (max-width: 1024px) {
+  .word-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .doc-title-input {
+    min-width: 0;
+    width: 100%;
+  }
+}
+

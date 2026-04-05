@@ -1,0 +1,50 @@
+﻿
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="modern-menubar-wrapper">
+  <p-menubar>
+    <ng-template pTemplate="start">
+      <a routerLink="/" class="logo">
+        <img src="/assets/images/logo.png" alt="DigiDoc Logo" class="logo-image" width="40" height="40">
+        <span class="logo-text">DigiDoc</span>
+      </a>
+    </ng-template>
+
+    <ng-template pTemplate="end">
+      <div class="custom-nav-items">
+        @for (item of items; track item.label) {
+          <a [routerLink]="item.routerLink"
+             (click)="item.command ? item.command() : null"
+             class="nav-item"
+             [class.logout-item]="item.label === 'Odjavi se'">
+            <i [class]="item.icon"></i> {{ item.label }}
+          </a>
+        }
+      </div>
+    </ng-template>
+
+  </p-menubar>
+</div>
+

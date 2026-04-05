@@ -1,0 +1,135 @@
+<div class="page-wrapper">
+  <div class="register-card">
+
+    <div class="header-section">
+      <h2 class="title">Kreiranje naloga</h2>
+      <p class="description">Pridružite se DigiDoc platformi i upravljajte svojim dokumentima.</p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="modern-form">
+      <div class="form-grid">
+        <div class="form-column">
+          <div class="form-group">
+            <label for="name">Ime</label>
+            <input pInputText id="name" type="text" formControlName="name" class="w-full"  />
+            @if (registerForm.get('name')?.invalid && registerForm.get('name')?.touched) {
+              <small class="p-error">{{ getErrorMessage('name') }}</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="surname">Prezime</label>
+            <input pInputText id="surname" type="text" formControlName="surname" class="w-full" />
+            @if (registerForm.get('surname')?.invalid && registerForm.get('surname')?.touched) {
+              <small class="p-error">{{ getErrorMessage('surname') }}</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email adresa</label>
+            <input pInputText id="email" type="email" formControlName="email" class="w-full" />
+            @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+              <small class="p-error">{{ getErrorMessage('email') }}</small>
+            }
+          </div>
+          <div class="form-group password-group position-relative">
+            <label>Lozinka</label>
+
+            <div class="password-wrapper">
+              <p-password
+                id="password"
+                formControlName="password"
+                [feedback]="false"
+                (onFocus)="onPasswordFocus()"
+                (onBlur)="onPasswordBlur()"
+                [toggleMask]="true"
+                styleClass="w-full"
+                inputStyleClass="w-full">
+              </p-password>
+            </div>
+
+            @if (passwordFocused && !(passwordCriteria.length && passwordCriteria.lowercase && passwordCriteria.uppercase && passwordCriteria.number && passwordCriteria.specialChar)) {
+              <ul class="password-requirements floating-requirements">
+                <li [class.valid]="passwordCriteria.length">
+                  <i class="pi" [ngClass]="passwordCriteria.length ? 'pi-check' : 'pi-times'"></i>
+                  Najmanje 8 karaktera
+                </li>
+                <li [class.valid]="passwordCriteria.lowercase">
+                  <i class="pi" [ngClass]="passwordCriteria.lowercase ? 'pi-check' : 'pi-times'"></i>
+                  Malo slovo
+                </li>
+                <li [class.valid]="passwordCriteria.uppercase">
+                  <i class="pi" [ngClass]="passwordCriteria.uppercase ? 'pi-check' : 'pi-times'"></i>
+                  Veliko slovo
+                </li>
+                <li [class.valid]="passwordCriteria.number">
+                  <i class="pi" [ngClass]="passwordCriteria.number ? 'pi-check' : 'pi-times'"></i>
+                  Broj
+                </li>
+                <li [class.valid]="passwordCriteria.specialChar">
+                  <i class="pi" [ngClass]="passwordCriteria.specialChar ? 'pi-check' : 'pi-times'"></i>
+                  Specijalni karakter
+                </li>
+              </ul>
+            }
+          </div>
+        </div>
+
+        <div class="form-column">
+          <div class="form-group">
+            <label for="username">Korisničko ime</label>
+            <input pInputText id="username" type="text" formControlName="username" class="w-full" />
+            @if (registerForm.get('username')?.invalid && registerForm.get('username')?.touched) {
+              <small class="p-error">{{ getErrorMessage('username') }}</small>
+            }
+          </div>
+          <div class="form-group">
+            <label for="phoneNumber">Broj telefona</label>
+            <input pInputText id="phoneNumber" type="text" formControlName="phoneNumber" class="w-full" />
+            @if (registerForm.get('phoneNumber')?.invalid && registerForm.get('phoneNumber')?.touched) {
+              <small class="p-error">{{ getErrorMessage('phoneNumber') }}</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="dateOfBirth">Datum rođenja</label>
+            <p-datePicker
+              id="dateOfBirth"
+              formControlName="dateOfBirth"
+              dateFormat="dd.mm.yy"
+              [showIcon]="true"
+              styleClass="w-full">
+            </p-datePicker>
+            @if (registerForm.get('dateOfBirth')?.invalid && registerForm.get('dateOfBirth')?.touched) {
+              <small class="p-error">{{ getErrorMessage('dateOfBirth') }}</small>
+            }
+          </div>
+          <div class="form-group gender-group">
+            <label>Pol</label>
+            <div class="radio-wrapper">
+              <div class="radio-item">
+                <p-radioButton name="isFemale" value="true" formControlName="isFemale" inputId="female"></p-radioButton>
+                <label for="female" class="radio-label">Ženski</label>
+              </div>
+              <div class="radio-item">
+                <p-radioButton name="isFemale" value="false" formControlName="isFemale" inputId="male"></p-radioButton>
+                <label for="male" class="radio-label">Muški</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="button-container">
+        <p-button
+          label="Kreiraj nalog"
+          icon="pi pi-user-plus"
+          type="submit"
+          [disabled]="registerForm.invalid"
+          styleClass="p-button-primary w-full p-button-lg">
+        </p-button>
+      </div>
+
+    </form>
+  </div>
+  <p-toast></p-toast>
+</div>

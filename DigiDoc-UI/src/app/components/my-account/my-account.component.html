@@ -1,0 +1,290 @@
+<div class="dashboard-container" *ngIf="!isLoadingUser && userData">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <i class="pi pi-user-edit"></i>
+      <span>Moj nalog</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button (click)="setActiveTab('osnovno')" [class.active]="activeTab === 'osnovno'">
+        <i class="pi pi-id-card"></i> Osnovne informacije
+      </button>
+
+      <button (click)="setActiveTab('detalji')" [class.active]="activeTab === 'detalji'">
+        <i class="pi pi-briefcase"></i> Poslovni detalji
+      </button>
+
+      <button (click)="setActiveTab('bezbednost')" [class.active]="activeTab === 'bezbednost'">
+        <i class="pi pi-lock"></i> Bezbednost
+      </button>
+
+      <button (click)="setActiveTab('moji-sabloni')" [class.active]="activeTab === 'moji-sabloni'">
+        <i class="pi pi-file-edit"></i> Moji sabloni
+      </button>
+
+      <button (click)="setActiveTab('moji-dokumenti')" [class.active]="activeTab === 'moji-dokumenti'">
+        <i class="pi pi-folder-open"></i> Moji dokumenti
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-logout" (click)="logout()">
+        <i class="pi pi-sign-out"></i> Odjavi se
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <form [formGroup]="updateForm" (ngSubmit)="onUpdate()">
+      <section class="tab-section" *ngIf="activeTab === 'osnovno'">
+        <h2>Osnovne informacije</h2>
+        <p class="tab-desc">Vasi licni podaci i podesavanja profila.</p>
+
+        <div class="form-container">
+          <div class="form-group">
+            <label>Ime *</label>
+            <input pInputText formControlName="name" />
+          </div>
+          <div class="form-group">
+            <label>Prezime *</label>
+            <input pInputText formControlName="surname" />
+          </div>
+          <div class="form-group">
+            <label>Email *</label>
+            <input pInputText formControlName="email" />
+          </div>
+          <div class="form-group">
+            <label>Pol</label>
+            <div class="radio-row">
+              <p-radioButton [value]="true" formControlName="isFemale" inputId="f"></p-radioButton>
+              <label for="f">Zenski</label>
+              <p-radioButton [value]="false" formControlName="isFemale" inputId="m"></p-radioButton>
+              <label for="m">Muski</label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-section animate-fade" *ngIf="activeTab === 'detalji'">
+        <h2>Poslovni detalji</h2>
+        <p class="tab-desc">Informacije o zaposlenju i lokaciji.</p>
+
+        <div class="form-container">
+          <div class="form-group">
+            <label>JMBG</label>
+            <input pInputText formControlName="jmbg" maxlength="13" />
+          </div>
+          <div class="form-group">
+            <label>Pozicija</label>
+            <input pInputText formControlName="jobTitle" />
+          </div>
+          <div class="form-group">
+            <label>Kompanija</label>
+            <input pInputText formControlName="company" />
+          </div>
+          <div class="form-group">
+            <label>Grad i adresa</label>
+            <input pInputText formControlName="city" placeholder="Grad" class="mb-2"/>
+            <input pInputText formControlName="address" placeholder="Ulica i broj" />
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-section animate-fade" *ngIf="activeTab === 'bezbednost'">
+        <h2>Bezbednost i lozinka</h2>
+
+        <div class="form-container">
+          <div class="form-group">
+            <label>Trenutna lozinka</label>
+            <input pPassword formControlName="currentPassword" [feedback]="false" type="password" />
+          </div>
+          <div class="form-group">
+            <label>Nova lozinka</label>
+            <input pPassword formControlName="newPassword" [feedback]="false" type="password" />
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-section animate-fade" *ngIf="activeTab === 'moji-sabloni'">
+        <div class="tab-title-row">
+          <div class="title-block">
+            <h2>Moji sabloni</h2>
+            <p class="tab-desc">Svi sabloni koje ste vi kreirali.</p>
+          </div>
+          <p-button label="Novi sablon" icon="pi pi-plus-circle" styleClass="create-button" routerLink="/create-template"></p-button>
+        </div>
+
+        <div class="collection-state" *ngIf="loadingMyTemplates">
+          <i class="pi pi-spin pi-spinner"></i>
+          <p>Ucitavanje sablona...</p>
+        </div>
+
+        <div class="collection-state error" *ngIf="!loadingMyTemplates && myTemplatesLoadError">
+          <i class="pi pi-exclamation-triangle"></i>
+          <p>Neuspesno ucitavanje sablona.</p>
+          <p-button label="Pokusaj ponovo" styleClass="p-button-outlined" (onClick)="loadMyTemplates()"></p-button>
+        </div>
+
+        <div class="collection-state" *ngIf="!loadingMyTemplates && !myTemplatesLoadError && myTemplates.length === 0">
+          <i class="pi pi-file-edit"></i>
+          <p>Jos nemate kreiranih sablona.</p>
+        </div>
+
+        <div class="templates-grid" *ngIf="!loadingMyTemplates && !myTemplatesLoadError && myTemplates.length > 0">
+          <article class="template-card clickable-card" *ngFor="let template of myTemplates" (click)="openTemplateEdit(template.id)">
+            <div class="card-top">
+              <div class="card-icon template-icon">
+                <i class="pi pi-file-edit"></i>
+              </div>
+              <span class="pill">{{ template.fields.length }} polja</span>
+            </div>
+
+            <div class="card-content">
+              <h3>{{ template.name }}</h3>
+              <p>{{ template.description || 'Ovaj sablon jos nema dodatni opis.' }}</p>
+            </div>
+
+            <div class="card-meta">
+              <span *ngIf="template.createdAt">
+                <i class="pi pi-calendar"></i>
+                {{ template.createdAt | date:'dd.MM.yyyy.' }}
+              </span>
+            </div>
+
+            <div class="card-actions">
+              <p-button label="Popuni" icon="pi pi-file-edit" styleClass="action-button fill-button" (onClick)="openTemplateFill(template.id); $event.stopPropagation()"></p-button>
+              <p-button label="Uredi" icon="pi pi-pencil" styleClass="action-button edit-button" (onClick)="openTemplateEdit(template.id); $event.stopPropagation()"></p-button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="tab-section animate-fade" *ngIf="activeTab === 'moji-dokumenti'">
+        <div class="tab-title-row">
+          <div class="title-block">
+            <h2>Moji dokumenti</h2>
+            <p class="tab-desc">Dokumenti koje ste vi kreirali i sacuvali.</p>
+          </div>
+          <p-button icon="pi pi-plus" styleClass="create-button docs-create-button" label="Novi dokument" routerLink="/create-blank-document"></p-button>
+        </div>
+
+        <div class="collection-state" *ngIf="loadingMyDocuments">
+          <i class="pi pi-spin pi-spinner"></i>
+          <p>Ucitavanje dokumenata...</p>
+        </div>
+
+        <div class="collection-state error" *ngIf="!loadingMyDocuments && myDocumentsLoadError">
+          <i class="pi pi-exclamation-triangle"></i>
+          <p>Neuspesno ucitavanje dokumenata.</p>
+          <p-button label="Pokusaj ponovo" styleClass="p-button-outlined" (onClick)="loadMyDocuments()"></p-button>
+        </div>
+
+        <div class="collection-state" *ngIf="!loadingMyDocuments && !myDocumentsLoadError && myDocuments.length === 0">
+          <i class="pi pi-folder-open"></i>
+          <p>Jos nemate sacuvanih dokumenata.</p>
+        </div>
+
+        <div class="documents-grid" *ngIf="!loadingMyDocuments && !myDocumentsLoadError && myDocuments.length > 0">
+          <article class="document-card clickable-card" *ngFor="let document of myDocuments" (click)="openDocument(document.id)">
+            <div class="card-top">
+              <div class="card-icon document-icon">
+                <i class="pi pi-file"></i>
+              </div>
+            </div>
+
+            <div class="card-content">
+              <h3>{{ document.title }}</h3>
+              <p>{{ document.description || 'Nema opisa' }}</p>
+            </div>
+
+            <div class="card-meta">
+              <span *ngIf="document.createdAt">
+                <i class="pi pi-calendar"></i>
+                {{ document.createdAt | date:'dd.MM.yyyy.' }}
+              </span>
+            </div>
+
+            <div class="card-actions">
+              <p-button label="Otvori" icon="pi pi-eye" styleClass="action-button open-button" (onClick)="openDocument(document.id); $event.stopPropagation()"></p-button>
+              <p-button label="Uredi" icon="pi pi-pencil" styleClass="action-button edit-button" (onClick)="openDocumentEdit(document.id); $event.stopPropagation()"></p-button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <div class="form-footer" *ngIf="activeTab !== 'bezbednost' && activeTab !== 'moji-sabloni' && activeTab !== 'moji-dokumenti'">
+        <p-button label="Sacuvaj izmene" icon="pi pi-save" type="submit" [disabled]="updateForm.invalid"></p-button>
+      </div>
+
+      <div class="form-footer" *ngIf="activeTab === 'bezbednost'">
+        <p-button label="Azuriraj lozinku" icon="pi pi-lock" type="submit" severity="warn"></p-button>
+      </div>
+
+      <section class="tab-section animate-fade" *ngIf="activeTab === 'bezbednost'">
+        <h2>Brisanje naloga</h2>
+
+        <div class="form-container">
+          <div class="form-group">
+            <p class="danger-text">
+              Paznja: Brisanje naloga je <strong>nepovratan proces</strong>.
+              Potvrdom ove akcije, svi vasi podaci ce biti trajno uklonjeni.
+            </p>
+
+            <ul class="danger-list">
+              <li>Korisnicki profil i licni podaci.</li>
+              <li>Istorija i podesavanja naloga.</li>
+              <li>Povezani poslovni podaci.</li>
+            </ul>
+
+            <p class="danger-note">
+              Nakon brisanja, nalog i podaci se ne mogu vratiti.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="form-footer" *ngIf="activeTab === 'bezbednost'">
+        <p-button label="Obrisi moj nalog" icon="pi pi-trash" severity="danger" (onClick)="deleteAccountDialogVisible = true" type="button"></p-button>
+      </div>
+    </form>
+
+    <p-dialog
+      [(visible)]="deleteAccountDialogVisible"
+      [modal]="true"
+      [style]="{ width: '30rem' }"
+      header="Potvrda brisanja"
+      [draggable]="false"
+      [resizable]="false">
+      <div class="text-center py-4">
+        <i class="pi pi-exclamation-triangle text-red-500" style="font-size: 3rem"></i>
+        <p class="mt-4 font-semibold" style="font-size: 1.1rem;">
+          Da li ste sigurni da zelite da obrisete svoj nalog?
+        </p>
+        <p class="text-sm text-gray-500 mt-2">Ova akcija je trajna i ne moze se ponistiti.</p>
+      </div>
+
+      <ng-template pTemplate="footer">
+        <div class="flex justify-content-center gap-3 w-full pb-3">
+          <p-button
+            label="Odustani"
+            icon="pi pi-times"
+            [text]="true"
+            severity="secondary"
+            (onClick)="cancelDeleteAccount()"
+            styleClass="p-button-lg">
+          </p-button>
+
+          <p-button
+            label="Obrisi nalog"
+            icon="pi pi-trash"
+            severity="danger"
+            (onClick)="confirmDeleteAccount()"
+            styleClass="p-button-lg">
+          </p-button>
+        </div>
+      </ng-template>
+    </p-dialog>
+  </main>
+</div>
+
+<p-toast></p-toast>

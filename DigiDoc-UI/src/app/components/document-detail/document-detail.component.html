@@ -1,0 +1,33 @@
+<div class="document-detail-container">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      
+      <div class="document-info" *ngIf="document">
+        <h1 class="document-title">{{ document.title }}</h1>
+        <p class="document-description">{{ document.description || 'Nema opisa' }}</p>
+      </div>
+    </div>
+
+    <div class="top-bar-right" *ngIf="document">
+      <button pButton type="button" icon="pi pi-pencil" label="Uredi" class="p-button-outlined" (click)="editDocument()"></button>
+    </div>
+  </div>
+
+  <div class="content-wrapper">
+    <div *ngIf="loading" class="loading-state">
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+      <p>Ucitavanje dokumenta...</p>
+    </div>
+
+    <div *ngIf="error" class="error-state">
+      <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #ef4444;"></i>
+      <p>{{ error }}</p>
+    </div>
+
+    <div *ngIf="!loading && !error && document" class="document-viewer">
+      <div class="page-container" *ngFor="let page of pages">
+        <div class="a4-page" [innerHTML]="page"></div>
+      </div>
+    </div>
+  </div>
+</div>

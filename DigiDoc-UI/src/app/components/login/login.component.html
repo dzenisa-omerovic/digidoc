@@ -1,0 +1,182 @@
+﻿<div class="full-page-container two-column-layout">
+
+  <div class="login-container" *ngIf="!userData && !isLoadingUser">
+    <h2>DobrodoÅ¡li ponovo</h2>
+    <p>Unesite vaÅ¡e podatke</p>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <input pInputText id="username" type="text" formControlName="username" placeholder="Unesite VaÅ¡e korisniÄko ime" />
+      </div>
+      <div class="form-group password-group">
+        <input
+          [type]="passwordVisible ? 'text' : 'password'"
+          pPassword
+          id="password"
+          formControlName="password"
+          placeholder="Unesite lozinku"
+          [feedback]="false"
+        />
+        <button
+          type="button"
+          class="toggle-password"
+          (click)="togglePasswordVisibility()"
+        >
+          {{ passwordVisible ? 'Sakrij' : 'PokaÅ¾i' }}
+        </button>
+      </div>
+      <p-button type="submit" label="Prijavi se" [disabled]="loginForm.invalid"></p-button>
+      <p class="signup-link">
+        Nemate nalog?
+        <a routerLink="/register">Napravite!</a>
+    </form>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p-toast></p-toast>
+</div>
+
+
+

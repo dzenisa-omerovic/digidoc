@@ -1,0 +1,227 @@
+<div class="page-wrapper">
+  <p-toast></p-toast>
+
+  <div class="page-shell">
+    <section class="page-header">
+      <div class="title-block">
+        <h1>{{ isEditMode ? 'Uredjivanje sablona' : 'Kreiranje sablona' }}</h1>
+        <p>{{ isEditMode ? 'Azurirajte postojeci sablon i njegova polja.' : 'Napravite dokument, uredite tekst i dodajte polja za automatsko popunjavanje.' }}</p>
+      </div>
+    </section>
+
+    <div class="form-layout">
+      <div class="form-section">
+        <div class="section-header">
+          <span class="section-step">1</span>
+          <div>
+            <h2>Osnovne informacije</h2>
+            <p>Unesite naziv i kratak opis kako bi sablon bio pregledan i lak za koriscenje.</p>
+          </div>
+        </div>
+
+        <div class="field-stack">
+          <div class="field-block">
+            <label for="template-name">Naziv dokumenta</label>
+            <input
+              id="template-name"
+              type="text"
+              pInputText
+              [(ngModel)]="template.name"
+              placeholder="Na primer: Ugovor o radu"
+              class="w-full">
+          </div>
+
+          <div class="field-block">
+            <label for="template-description">Kratak opis</label>
+            <input
+              id="template-description"
+              type="text"
+              pInputText
+              [(ngModel)]="template.description"
+              placeholder="Dodajte internu napomenu ili namenu sablona"
+              class="w-full">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header">
+          <span class="section-step">2</span>
+          <div>
+            <h2>Tekst sablona</h2>
+            <p>Napisite sadrzaj dokumenta i pripremite izgled koji ce korisnik kasnije popunjavati.</p>
+          </div>
+        </div>
+
+        <div class="editor-panel">
+          <div class="editor-shortcuts">
+            <button
+              pButton
+              type="button"
+              label="Podnaslov"
+              icon="pi pi-align-left"
+              class="p-button-text editor-shortcut"
+              (click)="insertSubheading()"></button>
+            <button
+              pButton
+              type="button"
+              label="Potpis"
+              icon="pi pi-pencil"
+              class="p-button-text editor-shortcut"
+              (click)="insertSignatureLine()"></button>
+            <button
+              pButton
+              type="button"
+              label="Placeholder"
+              icon="pi pi-tag"
+              class="p-button-text editor-shortcut"
+              (click)="insertPlaceholderToken()"></button>
+          </div>
+
+          <p-editor
+            [(ngModel)]="editorContent"
+            (ngModelChange)="onEditorContentChange($event)"
+            [style]="{'height':'720px'}"
+            placeholder="Ovde pisite tekst dokumenta..."
+            (onInit)="onEditorInit($event)">
+            <ng-template #header>
+              <span class="ql-formats">
+                <select class="ql-header">
+                  <option selected></option>
+                  <option value="1"></option>
+                  <option value="2"></option>
+                  <option value="3"></option>
+                </select>
+                <select class="ql-font">
+                  <option selected></option>
+                  <option value="serif"></option>
+                  <option value="monospace"></option>
+                </select>
+                <select class="ql-size">
+                  <option value="small"></option>
+                  <option selected></option>
+                  <option value="large"></option>
+                  <option value="huge"></option>
+                </select>
+              </span>
+              <span class="ql-formats">
+                <button type="button" class="ql-bold"></button>
+                <button type="button" class="ql-italic"></button>
+                <button type="button" class="ql-underline"></button>
+                <button type="button" class="ql-strike"></button>
+              </span>
+              <span class="ql-formats">
+                <select class="ql-color"></select>
+                <select class="ql-background"></select>
+              </span>
+              <span class="ql-formats">
+                <button type="button" class="ql-align" value=""></button>
+                <button type="button" class="ql-align" value="center"></button>
+                <button type="button" class="ql-align" value="right"></button>
+                <button type="button" class="ql-align" value="justify"></button>
+              </span>
+              <span class="ql-formats">
+                <button type="button" class="ql-list" value="ordered"></button>
+                <button type="button" class="ql-list" value="bullet"></button>
+                <button type="button" class="ql-indent" value="-1"></button>
+                <button type="button" class="ql-indent" value="+1"></button>
+              </span>
+              <span class="ql-formats">
+                <button type="button" class="ql-blockquote"></button>
+                <button type="button" class="ql-link"></button>
+                <button type="button" class="ql-image"></button>
+                <button type="button" class="ql-clean"></button>
+              </span>
+            </ng-template>
+          </p-editor>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header split-header">
+          <div class="section-heading">
+            <span class="section-step">3</span>
+            <div>
+              <h2>Dinamicna polja</h2>
+              <p>Dodajte promenljive koje ce se automatski ubacivati u dokument.</p>
+            </div>
+          </div>
+
+          <button
+            pButton
+            label="Dodaj polje"
+            icon="pi pi-plus"
+            class="add-field-action"
+            (click)="addField()"></button>
+        </div>
+
+        <div class="table-panel">
+          <p-table [value]="template.fields" responsiveLayout="scroll" styleClass="p-datatable-modern">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Naziv polja</th>
+                <th>Identifikator</th>
+                <th>Tip</th>
+                <th class="action-column"></th>
+              </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-field let-i="rowIndex">
+              <tr>
+                <td>
+                  <input type="text" pInputText [(ngModel)]="field.label" placeholder="Ime stranke" class="p-inputtext-sm w-full">
+                </td>
+                <td>
+                  <input type="text" pInputText [(ngModel)]="field.name" placeholder="ime_stranke" class="p-inputtext-sm w-full">
+                </td>
+                <td>
+                  <p-select
+                    [options]="fieldTypes"
+                    [(ngModel)]="field.type"
+                    optionLabel="label"
+                    optionValue="value"
+                    appendTo="body"
+                    class="w-full p-inputtext-sm">
+                  </p-select>
+                </td>
+                <td class="action-column">
+                  <button pButton icon="pi pi-trash" class="p-button-text p-button-danger" (click)="removeField(i)"></button>
+                </td>
+              </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="4">
+                  <div class="empty-state">
+                    <div class="empty-icon">
+                      <i class="pi pi-file-edit"></i>
+                    </div>
+                    <h3>Jos nema dodatih polja</h3>
+                    <p>Pocnite tako sto cete dodati prvo dinamicno polje za svoj dokument.</p>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </div>
+
+      <div class="bottom-actions">
+        <button
+          pButton
+          label="Nazad na sablone"
+          icon="pi pi-arrow-left"
+          class="p-button-text secondary-action"
+          (click)="goBack()"></button>
+        <button
+          pButton
+          [label]="isEditMode ? 'Azuriraj sablon' : 'Sacuvaj sablon'"
+          icon="pi pi-check"
+          class="primary-action"
+          (click)="saveTemplate()"></button>
+      </div>
+
+    </div>
+  </div>
+</div>
