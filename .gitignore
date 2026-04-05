@@ -1,0 +1,7 @@
+# Local development environment artifacts
+.dotnet/
+.nuget/
+.vscode/
+.tmp-build-api/
+.vs/
+digidoc/

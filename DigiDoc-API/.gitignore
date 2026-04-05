@@ -3,3 +3,9 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+
+# Local tooling / IDE
+.idea/
+.dotnet-home/
+.vs/
+*.user
