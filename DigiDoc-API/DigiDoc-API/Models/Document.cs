@@ -8,6 +8,12 @@ public class Document
     public string Content { get; set; } = string.Empty;
     public int? TemplateId { get; set; }
     public Template? Template { get; set; }
+    public Guid? OrganizationId { get; set; }
+    public Organization? Organization { get; set; }
+    public Guid? FolderId { get; set; }
+    public Folder? Folder { get; set; }
+    public Guid? CreatedByUserId { get; set; }
+    public User? CreatedByUser { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public ICollection<DocumentVersion> Versions { get; set; } = new List<DocumentVersion>();
 }

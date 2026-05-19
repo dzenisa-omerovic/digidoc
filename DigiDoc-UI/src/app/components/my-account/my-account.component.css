@@ -129,6 +129,19 @@
   color: #34495e;
 }
 
+.readonly-field {
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #dbe3ee;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #1f2937;
+  font-weight: 600;
+}
+
 .form-footer {
   margin-top: 40px;
   display: flex;
@@ -309,15 +322,20 @@
 }
 
 .card-meta {
-  color: #66758a;
-  font-size: 0.9rem;
-}
-
+    color: #66758a;
+    font-size: 0.9rem;
+  }
+  
 .card-meta span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-}
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .card-creator {
+    color: #475569;
+    font-weight: 600;
+  }
 
 .card-actions {
   display: flex;
@@ -366,14 +384,99 @@
   color: #c2410c;
 }
 
+:host ::ng-deep .reject-button.p-button {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #be123c;
+}
+
 :host ::ng-deep .open-button.p-button {
   background: #ecfeff;
   border: 1px solid #a5f3fc;
   color: #0e7490;
 }
 
+:host ::ng-deep .delete-button.p-button {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #be123c;
+}
+
 :host ::ng-deep .action-button.p-button:hover {
   filter: brightness(0.97);
+}
+
+.admin-section {
+  background: #ffffff;
+  border: 1px solid #e6e9ef;
+  border-radius: 18px;
+  padding: 1.4rem;
+}
+
+.admin-block {
+  margin-top: 1.2rem;
+}
+
+.admin-block h3 {
+  margin: 0 0 0.85rem;
+  color: #172033;
+  font-size: 1.1rem;
+}
+
+.admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid #e5eaf1;
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  background: #fbfcff;
+}
+
+.admin-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.admin-item-main strong {
+  color: #172033;
+  font-size: 1rem;
+}
+
+.admin-item-main span {
+  color: #556476;
+  font-size: 0.9rem;
+}
+
+.admin-item-main small {
+  color: #7b8797;
+  font-size: 0.82rem;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.organizations-list .admin-item {
+  background: linear-gradient(135deg, #eff6ff, #fff7ed);
+}
+
+.organization-item .admin-item-main span {
+  font-size: 0.8rem;
+}
+
+.organization-item .admin-item-main small {
+  max-width: 62ch;
+  line-height: 1.4;
 }
 
 @media (max-width: 1100px) {
@@ -395,5 +498,15 @@
   .tab-title-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .admin-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 }

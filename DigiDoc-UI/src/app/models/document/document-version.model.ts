@@ -4,4 +4,6 @@ export interface DocumentVersion {
   versionNumber: number;
   content: string;
   createdAt: Date;
+  createdByUserId?: string | null;
+  createdByDisplayName?: string;
 }

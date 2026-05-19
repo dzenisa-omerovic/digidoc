@@ -22,6 +22,10 @@ export const routes: Routes = [
     component: LoginComponent
   },
   {
+    path: 'create-organization',
+    loadComponent: () => import('./components/create-organization/create-organization.component').then(m => m.CreateOrganizationComponent)
+  },
+  {
     path: 'auth-warning',
     component: AuthWarningComponent
   },
@@ -60,7 +64,7 @@ export const routes: Routes = [
   },
   {
     path: 'document/:id/edit',
-    loadComponent: () => import('./components/document-edit/document-edit').then(m => m.DocumentEditComponent)
+    loadComponent: () => import('./components/document-edit/document-edit.component').then(m => m.DocumentEditComponent)
   },
   {
     path: '**',

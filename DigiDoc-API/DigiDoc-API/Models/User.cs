@@ -19,6 +19,13 @@ public class User : IdentityUser<Guid>
 
     public string? Company { get; set; } = string.Empty;
 
+    public Guid? OrganizationId { get; set; }
+    public Organization? Organization { get; set; }
+    public Guid? RequestedOrganizationId { get; set; }
+    public Organization? RequestedOrganization { get; set; }
+
+    public bool IsApproved { get; set; }
+
     public string? City { get; set; } = string.Empty;
 
     public string? Address { get; set; } = string.Empty;

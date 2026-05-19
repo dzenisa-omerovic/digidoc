@@ -11,6 +11,7 @@ public class RegisterDto
     [Required]
     [EmailAddress]
     public string? Email { get; set; }
+    public string? PhoneNumber { get; set; }
     [Required]
     public string? Password { get; set; }
     [StringLength(StringLengths.UserNameLength)]
@@ -19,4 +20,8 @@ public class RegisterDto
     public string? Surname { get; set; } = string.Empty;
     public DateTime? DateOfBirth { get; set; }
     public bool? IsFemale { get; set; }
+    public Guid? OrganizationId { get; set; }
+    public bool CreateOrganizationRequest { get; set; }
+    [StringLength(160)]
+    public string? OrganizationName { get; set; }
 }

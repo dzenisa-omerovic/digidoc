@@ -1,0 +1,100 @@
+<div class="page-wrapper">
+  <div class="request-shell">
+    <aside class="info-panel">
+      <p class="eyebrow">Onboarding organizacije</p>
+      <h2>Kreiraj organizaciju</h2>
+      <p class="subtitle">
+        Unesi podatke o organizaciji i nalogu buduceg AdminOrg korisnika.
+        Kada glavni administrator potvrdi zahtev, kreiraju se i organizacija i AdminOrg nalog.
+      </p>
+      <ol>
+        <li>Unesi osnovne podatke o organizaciji.</li>
+        <li>Definisi AdminOrg korisnicko ime i sifru.</li>
+        <li>Posalji zahtev i sacekaj potvrdu.</li>
+      </ol>
+    </aside>
+
+    <section class="request-card">
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-group">
+          <label for="organizationName">Ime organizacije</label>
+          <input id="organizationName" pInputText formControlName="organizationName" />
+          <small class="error" *ngIf="fieldError('organizationName')">{{ fieldError('organizationName') }}</small>
+        </div>
+
+        <div class="form-group">
+          <label for="establishedAt">Kada je osnovana</label>
+          <p-datePicker
+            id="establishedAt"
+            formControlName="establishedAt"
+            dateFormat="dd.mm.yy"
+            [showIcon]="true"
+            styleClass="w-full">
+          </p-datePicker>
+        </div>
+
+        <div class="form-group">
+          <label for="activityDescription">Cime se bavi</label>
+          <textarea id="activityDescription" class="activity-input" formControlName="activityDescription" rows="4"></textarea>
+          <small class="error" *ngIf="fieldError('activityDescription')">{{ fieldError('activityDescription') }}</small>
+        </div>
+
+        <div class="form-group">
+          <label for="adminUsername">Korisnicko ime (AdminOrg)</label>
+          <input id="adminUsername" pInputText formControlName="adminUsername" />
+          <small class="error" *ngIf="fieldError('adminUsername')">{{ fieldError('adminUsername') }}</small>
+        </div>
+
+        <div class="form-group password-group position-relative">
+          <label for="adminPassword">Sifra (AdminOrg)</label>
+          <p-password
+            id="adminPassword"
+            formControlName="adminPassword"
+            [feedback]="false"
+            [toggleMask]="true"
+            (onFocus)="onPasswordFocus()"
+            (onBlur)="onPasswordBlur()"
+            styleClass="w-full"
+            inputStyleClass="w-full">
+          </p-password>
+          <small class="error" *ngIf="fieldError('adminPassword')">{{ fieldError('adminPassword') }}</small>
+
+          <ul
+            class="password-requirements floating-requirements"
+            *ngIf="passwordFocused && !(passwordCriteria.length && passwordCriteria.lowercase && passwordCriteria.uppercase && passwordCriteria.number && passwordCriteria.specialChar)">
+            <li [class.valid]="passwordCriteria.length">
+              <i class="pi" [ngClass]="passwordCriteria.length ? 'pi-check' : 'pi-times'"></i>
+              Najmanje 8 karaktera
+            </li>
+            <li [class.valid]="passwordCriteria.lowercase">
+              <i class="pi" [ngClass]="passwordCriteria.lowercase ? 'pi-check' : 'pi-times'"></i>
+              Malo slovo
+            </li>
+            <li [class.valid]="passwordCriteria.uppercase">
+              <i class="pi" [ngClass]="passwordCriteria.uppercase ? 'pi-check' : 'pi-times'"></i>
+              Veliko slovo
+            </li>
+            <li [class.valid]="passwordCriteria.number">
+              <i class="pi" [ngClass]="passwordCriteria.number ? 'pi-check' : 'pi-times'"></i>
+              Broj
+            </li>
+            <li [class.valid]="passwordCriteria.specialChar">
+              <i class="pi" [ngClass]="passwordCriteria.specialChar ? 'pi-check' : 'pi-times'"></i>
+              Specijalni karakter
+            </li>
+          </ul>
+        </div>
+
+        <p-button
+          type="submit"
+          label="Posalji zahtev"
+          icon="pi pi-send"
+          [disabled]="loading"
+          styleClass="submit-btn">
+        </p-button>
+      </form>
+    </section>
+  </div>
+
+  <p-toast></p-toast>
+</div>

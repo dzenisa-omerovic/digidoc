@@ -91,7 +91,9 @@ export class LoginComponent implements OnInit {
     this.userService.login(loginData).subscribe({
       next: (response) => {
         console.log("API Response:", response);
-        this.router.navigate(['/my-account']);
+        const role = this.userService.getRole();
+        const targetRoute = role === 'Admin' || role === 'AdminOrg' ? '/my-account' : '/documents';
+        this.router.navigate([targetRoute]);
         this.messageService.add({
           severity: 'success',
           summary: 'Login Successful',
@@ -106,10 +108,11 @@ export class LoginComponent implements OnInit {
       },
 
       error: (err) => {
+        const detail = err?.error?.message || err?.error || 'Invalid username or password.';
         this.messageService.add({
           severity: 'error',
           summary: 'Login Error',
-          detail: 'Invalid username or password.'
+          detail
         });
 
         console.error('Error logging user:', err);

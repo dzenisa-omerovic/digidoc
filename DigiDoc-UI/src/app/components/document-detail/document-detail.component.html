@@ -1,14 +1,19 @@
 <div class="document-detail-container">
   <div class="top-bar">
-    <div class="top-bar-left">
-      
-      <div class="document-info" *ngIf="document">
-        <h1 class="document-title">{{ document.title }}</h1>
-        <p class="document-description">{{ document.description || 'Nema opisa' }}</p>
+      <div class="top-bar-left">
+        <div class="document-info" *ngIf="document">
+          <h1 class="document-title">{{ document.title }}</h1>
+          <p class="document-description">{{ document.description || 'Nema opisa' }}</p>
+          <span class="document-creator">
+            <i class="pi pi-user"></i>
+            {{ document.createdByDisplayName || 'Nepoznat korisnik' }}
+          </span>
+        </div>
       </div>
-    </div>
 
     <div class="top-bar-right" *ngIf="document">
+      <button pButton type="button" icon="pi pi-file-pdf" label="Izvezi PDF" class="p-button-outlined" (click)="exportPdf()"></button>
+      <button pButton type="button" icon="pi pi-code" label="Izvezi XML" class="p-button-outlined" (click)="exportXml()"></button>
       <button pButton type="button" icon="pi pi-pencil" label="Uredi" class="p-button-outlined" (click)="editDocument()"></button>
     </div>
   </div>
@@ -24,9 +29,58 @@
       <p>{{ error }}</p>
     </div>
 
-    <div *ngIf="!loading && !error && document" class="document-viewer">
-      <div class="page-container" *ngFor="let page of pages">
-        <div class="a4-page" [innerHTML]="page"></div>
+    <div *ngIf="!loading && !error && document" class="detail-layout">
+      <div class="active-version-banner">
+        <span class="badge">Izabrano</span>
+        <span class="meta" *ngIf="selectedVersionNumber != null">v{{ selectedVersionNumber }}</span>
+        <span class="meta" *ngIf="selectedVersionCreatedAt">{{ selectedVersionCreatedAt | date:'dd.MM.yyyy HH:mm' }}</span>
+      </div>
+
+      <aside class="versions-sidebar">
+        <div class="versions-sidebar-header">
+          <h2><i class="pi pi-history"></i> Verzije dokumenta</h2>
+          <p>{{ versions.length }} sacuvanih verzija</p>
+        </div>
+
+        <div *ngIf="loadingVersions" class="versions-info">
+          <i class="pi pi-spin pi-spinner"></i>
+          Ucitavanje verzija...
+        </div>
+
+        <div *ngIf="versionsError" class="versions-info error">
+          <i class="pi pi-exclamation-triangle"></i>
+          {{ versionsError }}
+        </div>
+
+        <div class="version-list" *ngIf="!loadingVersions && !versionsError && versions.length > 0">
+          <button
+            type="button"
+            class="version-card"
+            *ngFor="let version of versions; trackBy: trackByVersionId"
+            [class.active]="isVersionActive(version.id)"
+            (click)="openVersion(version)">
+          <div class="version-card-top">
+            <span class="version-tag">v{{ version.versionNumber }}</span>
+            <span class="version-date">{{ version.createdAt | date:'dd.MM.yyyy HH:mm' }}</span>
+            <span class="version-creator">
+              <i class="pi pi-user"></i>
+              {{ version.createdByDisplayName || 'Nepoznat korisnik' }}
+            </span>
+          </div>
+          </button>
+        </div>
+
+        <div *ngIf="!loadingVersions && !versionsError && versions.length === 0" class="versions-info">
+          Jos nema sacuvanih verzija.
+        </div>
+      </aside>
+
+      <div class="document-viewer-area">
+        <div class="document-viewer">
+          <div class="page-container" *ngFor="let page of pages">
+            <div class="a4-page" [innerHTML]="page"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

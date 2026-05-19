@@ -13,8 +13,17 @@
             pInputText
             type="text"
             [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearchQueryChange($event)"
+            (keyup.enter)="searchTemplates()"
             placeholder="Pretrazi sablone..." />
         </div>
+
+        <button
+          pButton
+          label="Pretrazi"
+          icon="pi pi-search"
+          class="p-button-outlined"
+          (click)="searchTemplates()"></button>
 
         <button
           pButton
@@ -26,16 +35,22 @@
     </section>
 
     <section class="overview-bar">
-      <div class="overview-card">
+      <div class="overview-card overview-card-primary">
         <span class="overview-label">Ukupno prikazano</span>
-        <strong>{{ loading ? '...' : getTemplateCountLabel(filteredTemplates.length) }}</strong>
-      </div>
-
-      <div class="overview-card">
-        <span class="overview-label">Status</span>
-        <strong>{{ loading ? 'Ucitavanje...' : 'Spremno za rad' }}</strong>
+        <strong>{{ loading ? '...' : getTemplateCountLabel(templates.length) }}</strong>
       </div>
     </section>
+
+    <section class="empty-state" *ngIf="deleteErrorMessage">
+      <div class="empty-illustration">
+        <i class="pi pi-exclamation-triangle"></i>
+      </div>
+      <h2>Brisanje nije uspelo</h2>
+      <p>{{ deleteErrorMessage }}</p>
+      <button pButton label="Zatvori poruku" icon="pi pi-times" class="p-button-outlined" (click)="deleteErrorMessage = ''"></button>
+    </section>
+
+    
 
     @if (loading) {
       <div class="templates-grid">
@@ -64,9 +79,9 @@
         <p>Frontend je pokusao da dobije sablone, ali `api/Template` nije odgovorio kako treba.</p>
         <button pButton label="Pokusaj ponovo" icon="pi pi-refresh" class="create-button" (click)="loadTemplates()"></button>
       </section>
-    } @else if (filteredTemplates.length > 0) {
+    } @else if (templates.length > 0) {
       <div class="templates-grid">
-        @for (item of filteredTemplates; track item.id) {
+        @for (item of templates; track item.id) {
           <article class="template-card">
             <div class="card-top">
               <div class="card-icon">
@@ -85,6 +100,10 @@
                 <i class="pi pi-calendar"></i>
                 {{ item.createdAt | date:'dd.MM.yyyy' }}
               </span>
+              <span>
+                <i class="pi pi-building"></i>
+                {{ getTemplateOrganizationName(item) }}
+              </span>
             </div>
 
             <div class="card-actions">
@@ -100,9 +119,20 @@
                 pButton
                 icon="pi pi-pencil"
                 class="p-button-text action-button"
+                *ngIf="canEditTemplate(item)"
                 pTooltip="Uredi sablon"
                 tooltipPosition="bottom"
                 [routerLink]="['/edit-template', item.id]"></button>
+
+              <button
+                pButton
+                [icon]="isDeletingTemplate(item.id) ? 'pi pi-spin pi-spinner' : 'pi pi-trash'"
+                class="p-button-text action-button delete-button"
+                *ngIf="canDeleteTemplate(item)"
+                pTooltip="Obrisi sablon"
+                tooltipPosition="bottom"
+                [disabled]="isDeletingTemplate(item.id)"
+                (click)="deleteTemplate(item, $event)"></button>
             </div>
           </article>
         }
@@ -114,8 +144,49 @@
         </div>
         <h2>Nema rezultata</h2>
         <p>Probajte drugu pretragu ili kreirajte novi sablon koji ce se odmah pojaviti u biblioteci.</p>
-        <button pButton label="Kreiraj sablon" icon="pi pi-plus" class="create-button" routerLink="/create-template"></button>
+        <div class="empty-actions">
+          <button pButton label="Ocisti pretragu" icon="pi pi-times" class="p-button-outlined" (click)="clearSearch()"></button>
+          <button pButton label="Kreiraj sablon" icon="pi pi-plus" class="create-button" routerLink="/create-template"></button>
+        </div>
       </section>
     }
+
+    <p-dialog
+      [(visible)]="deleteDialogVisible"
+      [modal]="true"
+      [style]="{ width: '30rem' }"
+      header="Potvrda brisanja"
+      [draggable]="false"
+      [resizable]="false"
+      (onHide)="cancelDeleteTemplate()">
+      <div class="text-center py-4">
+        <i class="pi pi-exclamation-triangle text-red-500" style="font-size: 2.6rem"></i>
+        <p class="mt-4 font-semibold" style="font-size: 1.05rem;">
+          Da li ste sigurni da zelite da obrisete sablon "{{ pendingTemplateDeleteName }}"?
+        </p>
+        <p class="text-sm text-gray-500 mt-2">Ova akcija je trajna i ne moze se ponistiti.</p>
+      </div>
+
+      <ng-template pTemplate="footer">
+        <div class="flex justify-content-center gap-3 w-full pb-3">
+          <p-button
+            label="Odustani"
+            icon="pi pi-times"
+            [text]="true"
+            severity="secondary"
+            (onClick)="cancelDeleteTemplate()"
+            styleClass="p-button-lg">
+          </p-button>
+
+          <p-button
+            label="Obrisi sablon"
+            icon="pi pi-trash"
+            severity="danger"
+            (onClick)="confirmDeleteTemplate()"
+            styleClass="p-button-lg">
+          </p-button>
+        </div>
+      </ng-template>
+    </p-dialog>
   </div>
 </div>

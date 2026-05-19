@@ -3,4 +3,5 @@ export interface CreateDocumentRequest {
   description: string;
   content: string;
   templateId?: number | null;
+  folderId?: string | null;
 }

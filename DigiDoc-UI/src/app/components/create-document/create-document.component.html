@@ -1,20 +1,16 @@
 <div class="document-page">
   <div class="document-shell">
     @if (loading) {
-      <section class="document-header skeleton-block">
+      <section class="skeleton-card">
         <div class="skeleton-title"></div>
         <div class="skeleton-subtitle"></div>
-      </section>
-
-      <section class="document-stage skeleton-card">
         <div class="skeleton-paper"></div>
       </section>
     } @else if (template) {
       <section class="document-header">
         <div class="header-copy">
-          <span class="eyebrow">Dokument pregled</span>
           <h1>{{ template.name }}</h1>
-          <p>{{ template.description || 'Pregledajte sablon kao gotov dokument i popunite polja kroz dijalog.' }}</p>
+          <p>{{ template.description || 'Popunite polja i pregledajte dokument na velikom papiru.' }}</p>
         </div>
 
         <div class="header-actions">
@@ -24,81 +20,27 @@
             icon="pi pi-arrow-left"
             class="p-button-text secondary-action"
             [routerLink]="['/template', template.id]"></button>
-          <button
-            pButton
-            label="Popuni dokument"
-            icon="pi pi-pen-to-square"
-            class="primary-action"
-            (click)="openFillDialog()"></button>
         </div>
       </section>
 
-      <section class="document-stage">
-        <div class="stage-topbar">
-          <div class="stage-status">
-            <span>{{ pages.length }} strana{{ pages.length === 1 ? '' : 'e' }}</span>
-            <span *ngIf="matchedPlaceholderCount > 0">{{ matchedPlaceholderCount }} placeholder mesta</span>
-          </div>
-
-          @if (spreads.length > 1) {
-            <div class="stage-navigation">
-              <button
-                pButton
-                type="button"
-                icon="pi pi-chevron-left"
-                class="p-button-text nav-button"
-                [disabled]="currentSpreadIndex === 0"
-                (click)="previousSpread()"></button>
-              <span>Prikaz {{ currentSpreadIndex + 1 }} / {{ spreads.length }}</span>
-              <button
-                pButton
-                type="button"
-                icon="pi pi-chevron-right"
-                class="p-button-text nav-button"
-                [disabled]="currentSpreadIndex === spreads.length - 1"
-                (click)="nextSpread()"></button>
-            </div>
+      <section class="paper-stage">
+        <div class="paper-stack">
+          @for (page of pages; track $index) {
+            <article class="preview-paper">
+              <div class="page-label">Strana {{ $index + 1 }}</div>
+              <div class="preview-render" [innerHTML]="page"></div>
+            </article>
           }
-        </div>
-
-        <div class="spread-window">
-          <div class="spread-track" [style.transform]="'translateX(-' + (currentSpreadIndex * 100) + '%)'">
-            @for (spread of spreads; track $index) {
-              <div class="document-spread">
-                @for (page of spread; track $index) {
-                  <article class="preview-paper">
-                    <div class="paper-meta">
-                      <span class="paper-draft">DigiDoc preview</span>
-                      <span class="paper-date">{{ template.createdAt | date:'dd.MM.yyyy' }}</span>
-                    </div>
-                    <h3>{{ template.name }}</h3>
-                    <div class="preview-render" [innerHTML]="page"></div>
-                  </article>
-                }
-
-                @if (spread.length === 1) {
-                  <article class="preview-paper empty-paper">
-                    <div class="paper-shadow-text">Sledeca strana</div>
-                  </article>
-                }
-              </div>
-            }
-          </div>
         </div>
 
         <div class="document-footer">
           <button
             pButton
-            label="Izvezi u XML"
-            icon="pi pi-code"
+            label="Popuni polja"
+            icon="pi pi-pen-to-square"
             class="p-button-text secondary-action"
-            (click)="exportXml()"></button>
-          <button
-            pButton
-            label="Izvezi u PDF"
-            icon="pi pi-file-pdf"
-            class="p-button-text secondary-action"
-            (click)="exportPdf()"></button>
+            (click)="openFillDialog()"></button>
+          
           <button
             pButton
             label="Resetuj dokument"
@@ -129,7 +71,7 @@
         styleClass="fill-dialog"
         header="Popuni dokument">
         <div class="dialog-intro">
-          <p>Unesite vrednosti za dinamicna polja. Ako ih ima mnogo, forma je skrolabilna.</p>
+          <p>Unesite vrednosti za dinamicna polja.</p>
         </div>
 
         @if (template.fields.length > 0) {

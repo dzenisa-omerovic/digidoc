@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import {BehaviorSubject, Observable, tap} from 'rxjs';
 import { UserRegister } from '../models/user/user-register.model';
@@ -39,8 +39,8 @@ export class UserService {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.get<UserInfoData>(`${this.apiUrl}/me`, { headers });
   }
-  register(user: UserRegister): Observable<UserRegister> {
-    return this.http.post<UserRegister>(`${this.apiUrl}/register`, user);
+  register(user: UserRegister): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/register`, user);
   }
   updateUser(userData: UpdateUser): Observable<UpdateUser> {
     const token = localStorage.getItem('token');
@@ -86,5 +86,17 @@ export class UserService {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.put<UpdateUser>(`${this.apiUrl}/update-user-by-admin/${userId}`, userData, { headers });
+  }
+
+  approveUserByAdmin(userId: string): Observable<UserInfoData> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.put<UserInfoData>(`${this.apiUrl}/users/${userId}/approve`, {}, { headers });
+  }
+
+  approveUserByOrgAdmin(userId: string): Observable<UserInfoData> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.put<UserInfoData>(`${this.apiUrl}/users/${userId}/approve-membership`, {}, { headers });
   }
 }

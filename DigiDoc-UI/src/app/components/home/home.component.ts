@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { UserService } from '../../services/user.service';
 
@@ -9,11 +9,17 @@ import { UserService } from '../../services/user.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   constructor(
     private router: Router,
     private userService: UserService
   ) {}
+
+  ngOnInit(): void {
+    if (this.userService.isLoggedIn()) {
+      this.router.navigate(['/documents']);
+    }
+  }
 
   highlights = [
     {

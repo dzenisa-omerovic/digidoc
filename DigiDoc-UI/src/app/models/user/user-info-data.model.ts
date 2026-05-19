@@ -12,4 +12,11 @@ export interface UserInfoData {
   city: string;
   address: string;
   company: string;
+  organizationId: string | null;
+  organizationName: string;
+  isApproved: boolean;
+  isOrganizationApproved: boolean;
+  isOrganizationCreationRequest: boolean;
+  isOrgAdmin: boolean;
+  role: string;
 }

@@ -1,17 +1,18 @@
 <div class="page-wrapper">
   <div class="register-card">
-
     <div class="header-section">
       <h2 class="title">Kreiranje naloga</h2>
-      <p class="description">Pridružite se DigiDoc platformi i upravljajte svojim dokumentima.</p>
+      <p class="description">Pridruzite se DigiDoc platformi i upravljajte svojim dokumentima.</p>
     </div>
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="modern-form">
+      
+
       <div class="form-grid">
         <div class="form-column">
           <div class="form-group">
             <label for="name">Ime</label>
-            <input pInputText id="name" type="text" formControlName="name" class="w-full"  />
+            <input pInputText id="name" type="text" formControlName="name" class="w-full" />
             @if (registerForm.get('name')?.invalid && registerForm.get('name')?.touched) {
               <small class="p-error">{{ getErrorMessage('name') }}</small>
             }
@@ -32,9 +33,9 @@
               <small class="p-error">{{ getErrorMessage('email') }}</small>
             }
           </div>
+
           <div class="form-group password-group position-relative">
             <label>Lozinka</label>
-
             <div class="password-wrapper">
               <p-password
                 id="password"
@@ -77,12 +78,13 @@
 
         <div class="form-column">
           <div class="form-group">
-            <label for="username">Korisničko ime</label>
+            <label for="username">Korisnicko ime</label>
             <input pInputText id="username" type="text" formControlName="username" class="w-full" />
             @if (registerForm.get('username')?.invalid && registerForm.get('username')?.touched) {
               <small class="p-error">{{ getErrorMessage('username') }}</small>
             }
           </div>
+
           <div class="form-group">
             <label for="phoneNumber">Broj telefona</label>
             <input pInputText id="phoneNumber" type="text" formControlName="phoneNumber" class="w-full" />
@@ -92,7 +94,7 @@
           </div>
 
           <div class="form-group">
-            <label for="dateOfBirth">Datum rođenja</label>
+            <label for="dateOfBirth">Datum rodjenja</label>
             <p-datePicker
               id="dateOfBirth"
               formControlName="dateOfBirth"
@@ -104,31 +106,64 @@
               <small class="p-error">{{ getErrorMessage('dateOfBirth') }}</small>
             }
           </div>
+
+          @if (registrationMode === 'join') {
+            <div class="form-group">
+              <label for="organizationId">Organizacija</label>
+              <p-select
+                id="organizationId"
+                formControlName="organizationId"
+                [options]="organizations"
+                optionLabel="name"
+                optionValue="id"
+                placeholder="Izaberite organizaciju"
+                [filter]="true"
+                filterBy="name"
+                [loading]="loadingOrganizations"
+                styleClass="w-full">
+              </p-select>
+              @if (registerForm.get('organizationId')?.invalid && registerForm.get('organizationId')?.touched) {
+                <small class="p-error">{{ getErrorMessage('organizationId') }}</small>
+              }
+            </div>
+          } @else {
+            <div class="form-group">
+              <label for="organizationName">Naziv nove organizacije</label>
+              <input pInputText id="organizationName" type="text" formControlName="organizationName" class="w-full" />
+              @if (registerForm.get('organizationName')?.invalid && registerForm.get('organizationName')?.touched) {
+                <small class="p-error">{{ getErrorMessage('organizationName') }}</small>
+              }
+              <small class="p-hint">
+                Ovaj zahtev odobrava glavni administrator. Odobrenjem se kreiraju organizacija i AdminOrg nalog.
+              </small>
+            </div>
+          }
+
           <div class="form-group gender-group">
             <label>Pol</label>
             <div class="radio-wrapper">
               <div class="radio-item">
                 <p-radioButton name="isFemale" value="true" formControlName="isFemale" inputId="female"></p-radioButton>
-                <label for="female" class="radio-label">Ženski</label>
+                <label for="female" class="radio-label">Zenski</label>
               </div>
               <div class="radio-item">
                 <p-radioButton name="isFemale" value="false" formControlName="isFemale" inputId="male"></p-radioButton>
-                <label for="male" class="radio-label">Muški</label>
+                <label for="male" class="radio-label">Muski</label>
               </div>
             </div>
           </div>
         </div>
       </div>
+
       <div class="button-container">
         <p-button
           label="Kreiraj nalog"
           icon="pi pi-user-plus"
           type="submit"
-          [disabled]="registerForm.invalid"
+          [disabled]="registerForm.invalid || (registrationMode === 'join' && (loadingOrganizations || organizations.length === 0))"
           styleClass="p-button-primary w-full p-button-lg">
         </p-button>
       </div>
-
     </form>
   </div>
   <p-toast></p-toast>

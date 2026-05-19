@@ -25,10 +25,6 @@
           <i class="pi pi-stop"></i>
           Text Box
         </button>
-        <button type="button" class="toolbar-action" (click)="insertTableBlock()">
-          <i class="pi pi-table"></i>
-          Tabela
-        </button>
       </span>
 
       <span class="ql-formats">
@@ -83,17 +79,30 @@
   <div class="word-workspace">
     <div
       class="a4-page-container"
+      [style.min-height.px]="editorCanvasHeight"
+      [style.--editor-canvas-height.px]="editorCanvasHeight"
+      [style.--single-page-height.px]="pageHeightPx"
       [style.--textbox-top-offset.px]="textFlowTopOffset"
       [style.--textbox-left-offset.px]="textFlowLeftOffset"
       [style.--textbox-right-offset.px]="textFlowRightOffset">
-      <p-editor
-        [(ngModel)]="editorContent"
-        (ngModelChange)="onEditorContentChange($event)"
-        [modules]="editorModules"
-        [style]="{'min-height':'1056px', 'border': 'none', 'padding': '0'}"
-        placeholder="Zapocnite kucanje ovde..."
-        (onInit)="onEditorInit($event)">
-      </p-editor>
+      <div class="page-stack" aria-hidden="true">
+        @for (pageIndex of pageIndexes; track pageIndex) {
+          <article class="page-sheet" [style.top.px]="pageIndex * pageHeightPx">
+            <span class="page-label">Strana {{ pageIndex + 1 }}</span>
+          </article>
+        }
+      </div>
+
+      <div class="editor-layer">
+        <p-editor
+          [(ngModel)]="editorContent"
+          (ngModelChange)="onEditorContentChange($event)"
+          [modules]="editorModules"
+          [style]="{'min-height':'1056px', 'border': 'none', 'padding': '0'}"
+          placeholder="Zapocnite kucanje ovde..."
+          (onInit)="onEditorInit($event)">
+        </p-editor>
+      </div>
 
       <div class="floating-layer" #floatingLayer [style.height.px]="textBoxZoneHeight">
         @for (box of floatingTextBoxes; track box.id) {

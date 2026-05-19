@@ -1,45 +1,410 @@
 <div class="documents-container">
-  <div class="header-section">
-    <div>
-      <h1 class="page-title">Vaši dokumenti</h1>
-      <p class="page-subtitle">Pregled i upravljanje svim sačuvanim dokumentima</p>
-    </div>
-    <button pButton icon="pi pi-plus" class="p-button-primary" label="Novi dokument" routerLink="/create-blank-document"></button>
-  </div>
+  <section class="hero-section">
+    <div class="hero-copy">
+      <p class="hero-eyebrow">Dokument centar</p>
+      <h1 class="page-title">Dokumenti vase kompanije</h1>
+      <p class="page-subtitle">
+        Prikazani su samo dokumenti i sabloni korisnika iz iste organizacije. Pretrazite dokumente, otvorite poslednju verziju i nastavite rad bez lutanja.
+      </p>
 
-  <div *ngIf="loading" class="loading-state">
-    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-    <p>Učitavanje dokumenata...</p>
-  </div>
-
-  <div *ngIf="error" class="error-state">
-    <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #ef4444;"></i>
-    <p>{{ error }}</p>
-    <button pButton label="Pokušaj ponovo" class="p-button-outlined" (click)="loadDocuments()"></button>
-  </div>
-
-  <div *ngIf="!loading && !error && documents.length === 0" class="empty-state">
-    <i class="pi pi-folder-open empty-icon"></i>
-    <h3>Nemate sačuvanih dokumenata</h3>
-    <p>Kreirajte vaš prvi dokument iz šablona ili kao potpuno nov prazan dokument.</p>
-    <button pButton label="Kreiraj prazan dokument" routerLink="/create-blank-document" class="p-button-primary p-button-outlined mt-3"></button>
-  </div>
-
-  <div *ngIf="!loading && !error && documents.length > 0" class="documents-grid">
-    <div class="document-card" *ngFor="let doc of documents" (click)="openDocument(doc.id)">
-      <div class="card-icon">
-        <i class="pi pi-file"></i>
-      </div>
-      <div class="card-content">
-        <h3 class="card-title">{{ doc.title }}</h3>
-        <p class="card-description">{{ doc.description || 'Nema opisa' }}</p>
-      </div>
-      <div class="card-footer">
-        <span class="card-date" *ngIf="doc.createdAt">
-          <i class="pi pi-calendar"></i> {{ doc.createdAt | date:'dd.MM.yyyy.' }}
-        </span>
-        <button pButton icon="pi pi-eye" class="p-button-text p-button-rounded p-button-sm view-btn" title="Pogledaj"></button>
+      <div class="hero-chips">
+        <span class="hero-chip blue"><i class="pi pi-copy"></i> {{ totalDocuments }} ukupno</span>
+        <span class="hero-chip orange"><i class="pi pi-clock"></i> {{ recentDocumentsCount }} ove nedelje</span>
+        <span class="hero-chip neutral"><i class="pi pi-chart-line"></i> {{ templateCoveragePercent }}% po sablonu</span>
       </div>
     </div>
+
+    <div class="hero-actions">
+      <button pButton icon="pi pi-plus" class="primary-create" label="Novi dokument" routerLink="/create-blank-document"></button>
+      <button pButton icon="pi pi-folder-open" class="secondary-create" label="Sabloni" routerLink="/templates"></button>
+      <button pButton icon="pi pi-plus" class="primary-create" label="Novi sablon" routerLink="/create-template"></button>
+    </div>
+  </section>
+
+  <div class="workspace-grid">
+    <aside class="folders-panel">
+      <div class="folders-header">
+        <h2>Folderi</h2>
+        <button pButton icon="pi pi-plus" label="Novi root" class="p-button-sm" (click)="openCreateRootFolderDialog()"></button>
+      </div>
+
+      <div class="folders-shortcuts">
+        <button class="folder-shortcut" [class.active]="folderSelectionMode === 'all'" (click)="selectAllFolders()">
+          <i class="pi pi-th-large"></i>
+          Svi dokumenti
+        </button>
+        <button class="folder-shortcut" [class.active]="folderSelectionMode === 'root'" (click)="selectRootOnly()">
+          <i class="pi pi-inbox"></i>
+          Root (bez foldera)
+        </button>
+      </div>
+
+      <div *ngIf="loadingFolders" class="folders-state">
+        <i class="pi pi-spin pi-spinner"></i>
+        <span>Ucitavanje foldera...</span>
+      </div>
+
+      <div *ngIf="!loadingFolders && folderError" class="folders-state error">
+        <span>{{ folderError }}</span>
+        <button pButton type="button" label="Pokusaj ponovo" class="p-button-text" (click)="loadFolders()"></button>
+      </div>
+
+      <div class="folder-tree" *ngIf="!loadingFolders && !folderError">
+        <ul class="folder-list" *ngIf="rootFolders.length > 0">
+          <ng-container *ngFor="let folder of rootFolders">
+            <ng-container [ngTemplateOutlet]="folderNode" [ngTemplateOutletContext]="{ folder: folder }"></ng-container>
+          </ng-container>
+        </ul>
+
+        <p class="folders-empty" *ngIf="rootFolders.length === 0">Jos nema foldera u organizaciji.</p>
+      </div>
+
+      <div class="selected-folder-card">
+        <div class="selected-folder-title">Aktivno:</div>
+        <div class="selected-folder-value">{{ selectedFolderLabel }}</div>
+      </div>
+
+      <div class="folder-actions" *ngIf="canManageSelectedFolder">
+        <button pButton type="button" icon="pi pi-plus" label="Podfolder" class="p-button-sm" (click)="openCreateChildFolderDialog()"></button>
+        <button pButton type="button" icon="pi pi-pencil" label="Preimenuj" class="p-button-sm p-button-outlined" (click)="openRenameFolderDialog()"></button>
+        <button pButton type="button" icon="pi pi-directions-alt" label="Premesti" class="p-button-sm p-button-outlined" (click)="openMoveFolderDialog()"></button>
+        <button pButton type="button" icon="pi pi-trash" label="Obrisi" class="p-button-sm p-button-danger p-button-outlined" (click)="openDeleteFolderDialog()"></button>
+      </div>
+    </aside>
+
+    <section class="documents-panel">
+      <div class="filter-bar">
+        <div class="filter-tabs">
+          <button
+            class="filter-tab"
+            [class.active]="filterMode === 'all'"
+            (click)="setFilter('all')"
+            id="filter-all">
+            <i class="pi pi-th-large"></i>
+            Svi dokumenti
+          </button>
+
+          <div class="filter-tab-dropdown" [class.active]="filterMode === 'template'">
+            <button
+              class="filter-tab"
+              [class.active]="filterMode === 'template'"
+              id="filter-template-toggle"
+              (click)="toggleTemplateDropdown()">
+              <i class="pi pi-copy"></i>
+              Po sablonu
+              <i class="pi pi-chevron-down chevron-icon" [class.rotated]="showTemplateDropdown || filterMode === 'template'"></i>
+            </button>
+
+            <div class="template-dropdown" *ngIf="showTemplateDropdown">
+              <div class="dropdown-inner">
+                <div *ngIf="loadingTemplates" class="dropdown-loading">
+                  <i class="pi pi-spin pi-spinner"></i> Ucitavanje...
+                </div>
+                <div *ngIf="!loadingTemplates && templates.length === 0" class="dropdown-empty">
+                  Nema dostupnih sablona
+                </div>
+                <div
+                  *ngFor="let tmpl of templates"
+                  class="dropdown-item"
+                  [class.selected]="selectedTemplateId === tmpl.id"
+                  (click)="onTemplateSelect(tmpl.id!)"
+                  [id]="'template-option-' + tmpl.id">
+                  <i class="pi pi-file-o"></i>
+                  <span>{{ tmpl.name }}</span>
+                  <i class="pi pi-check check-icon" *ngIf="selectedTemplateId === tmpl.id"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            class="filter-tab"
+            [class.active]="filterMode === 'noTemplate'"
+            (click)="setFilter('noTemplate')"
+            id="filter-no-template">
+            <i class="pi pi-file"></i>
+            Bez sablona
+          </button>
+        </div>
+
+        <div class="active-filter-badge" *ngIf="filterMode !== 'all'">
+          <i class="pi pi-filter-fill"></i>
+          {{ activeFilterLabel }}
+          <button class="clear-filter" (click)="setFilter('all')" title="Ukloni filter">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="search-bar">
+        <i class="pi pi-search search-icon"></i>
+        <input
+          type="text"
+          class="search-input"
+          [ngModel]="searchInput"
+          (ngModelChange)="onSearchInputChange($event)"
+          (keyup.enter)="submitSearch()"
+          placeholder="Pretrazite po naslovu, opisu i sadrzaju..." />
+
+        <button pButton type="button" label="Pretrazi" class="search-submit-btn" (click)="submitSearch()"></button>
+
+        <button class="clear-search" *ngIf="searchInput" (click)="clearSearch()" title="Ocisti pretragu">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <div class="result-meta" *ngIf="!loading && !error">
+        {{ totalResults }} rezultata
+        <span *ngIf="searchTerm">za "{{ searchTerm }}"</span>
+      </div>
+
+      <div *ngIf="loading" class="loading-state">
+        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+        <p>Ucitavanje dokumenata...</p>
+      </div>
+
+      <div *ngIf="error" class="error-state">
+        <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #ef4444;"></i>
+        <p>{{ error }}</p>
+        <button pButton label="Pokusaj ponovo" class="p-button-outlined" (click)="loadDocuments()"></button>
+      </div>
+
+      <div *ngIf="!loading && !error && documents.length === 0" class="empty-state">
+        <i class="pi pi-folder-open empty-icon"></i>
+        <h3>
+          <ng-container *ngIf="searchTerm">Nema rezultata za ovu pretragu</ng-container>
+          <ng-container *ngIf="!searchTerm && filterMode === 'all'">Nemate sacuvanih dokumenata</ng-container>
+          <ng-container *ngIf="!searchTerm && filterMode === 'noTemplate'">Nema dokumenata bez sablona</ng-container>
+          <ng-container *ngIf="!searchTerm && filterMode === 'template'">Nema dokumenata za ovaj sablon</ng-container>
+        </h3>
+        <p>Kreirajte vas prvi dokument iz sablona ili kao potpuno nov blank dokument.</p>
+        <button pButton label="Kreiraj blank dokument" routerLink="/create-blank-document" class="p-button-primary p-button-outlined mt-3"></button>
+      </div>
+
+      <div *ngIf="!loading && !error && documents.length > 0" class="documents-grid">
+        <div class="document-card" *ngFor="let doc of documents" (click)="openDocument(doc.id)">
+          <div class="card-icon" [class.has-template]="doc.templateId">
+            <i class="pi" [class.pi-file]="!doc.templateId" [class.pi-copy]="doc.templateId"></i>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">{{ doc.title }}</h3>
+            <p class="card-description">{{ doc.description || 'Nema opisa' }}</p>
+            <p class="card-snippet" *ngIf="doc.snippetHtml" [innerHTML]="doc.snippetHtml"></p>
+          </div>
+          <div class="card-footer">
+            <div class="card-meta">
+              <span class="card-date" *ngIf="doc.createdAt">
+                <i class="pi pi-calendar"></i> {{ doc.createdAt | date:'dd.MM.yyyy.' }}
+              </span>
+              <span class="card-creator">
+                <i class="pi pi-user"></i> Kreirao: {{ getCreatorName(doc) }}
+              </span>
+              <span class="card-template-badge">
+                <i class="pi pi-building"></i> {{ getDocumentOrganizationName(doc) }}
+              </span>
+              <span class="card-template-badge folder-badge">
+                <i class="pi pi-folder"></i> {{ getFolderName(doc) }}
+              </span>
+              <span class="card-template-badge" *ngIf="doc.template?.name">
+                <i class="pi pi-copy"></i> {{ doc.template!.name }}
+              </span>
+              <span class="card-template-badge blank-badge" *ngIf="!doc.templateId">
+                <i class="pi pi-file"></i> Blank dokument
+              </span>
+            </div>
+            <div class="card-actions">
+              <button
+                pButton
+                icon="pi pi-eye"
+                class="p-button-text p-button-rounded p-button-sm view-btn"
+                title="Pogledaj"
+                (click)="openDocument(doc.id); $event.stopPropagation()"></button>
+              <button
+                pButton
+                [icon]="isMoving(doc.id) ? 'pi pi-spin pi-spinner' : 'pi pi-folder-open'"
+                class="p-button-text p-button-rounded p-button-sm move-btn"
+                *ngIf="canDeleteDocument(doc)"
+                [disabled]="isMoving(doc.id)"
+                title="Premesti u folder"
+                (click)="openMoveDocumentDialog(doc, $event)"></button>
+              <button
+                pButton
+                [icon]="isDeleting(doc.id) ? 'pi pi-spin pi-spinner' : 'pi pi-trash'"
+                class="p-button-text p-button-rounded p-button-sm delete-btn"
+                *ngIf="canDeleteDocument(doc)"
+                [disabled]="isDeleting(doc.id)"
+                title="Obrisi"
+                (click)="deleteDocument(doc, $event)"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pagination-bar" *ngIf="!loading && !error && totalPages > 1">
+        <button pButton type="button" label="Prethodna" class="p-button-outlined" (click)="goToPreviousPage()" [disabled]="!hasPreviousPage"></button>
+        <span>Strana {{ currentPage }} od {{ totalPages }}</span>
+        <button pButton type="button" label="Sledeca" class="p-button-outlined" (click)="goToNextPage()" [disabled]="!hasNextPage"></button>
+      </div>
+    </section>
   </div>
+
+  <p-dialog
+    [(visible)]="deleteDialogVisible"
+    [modal]="true"
+    [style]="{ width: '30rem' }"
+    header="Potvrda brisanja"
+    [draggable]="false"
+    [resizable]="false"
+    (onHide)="cancelDeleteDocument()">
+    <div class="text-center py-4">
+      <i class="pi pi-exclamation-triangle text-red-500" style="font-size: 2.6rem"></i>
+      <p class="mt-4 font-semibold" style="font-size: 1.05rem;">
+        Da li ste sigurni da zelite da obrisete dokument "{{ pendingDocumentDeleteTitle }}"?
+      </p>
+      <p class="text-sm text-gray-500 mt-2">Ova akcija je trajna i ne moze se ponistiti.</p>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="flex justify-content-center gap-3 w-full pb-3">
+        <p-button
+          label="Odustani"
+          icon="pi pi-times"
+          [text]="true"
+          severity="secondary"
+          (onClick)="cancelDeleteDocument()"
+          styleClass="p-button-lg">
+        </p-button>
+
+        <p-button
+          label="Obrisi dokument"
+          icon="pi pi-trash"
+          severity="danger"
+          (onClick)="confirmDeleteDocument()"
+          styleClass="p-button-lg">
+        </p-button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog
+    [(visible)]="folderDialogVisible"
+    [modal]="true"
+    [style]="{ width: '32rem' }"
+    [header]="folderDialogTitle"
+    [draggable]="false"
+    [resizable]="false"
+    (onHide)="closeFolderDialog()">
+    <div class="folder-dialog-body">
+      <div *ngIf="folderDialogMode !== 'move'" class="folder-form-group">
+        <label>Naziv foldera</label>
+        <input type="text" class="folder-input" [(ngModel)]="folderDialogInputName" maxlength="160" placeholder="Unesite naziv foldera" />
+      </div>
+
+      <div *ngIf="folderDialogMode === 'move'" class="folder-form-group">
+        <label>Novi parent folder</label>
+        <select class="folder-select" [(ngModel)]="folderDialogTargetParentId">
+          <option value="">Root (bez parent foldera)</option>
+          <option *ngFor="let folder of availableParentFoldersForMove" [value]="folder.id">{{ folder.name }}</option>
+        </select>
+      </div>
+
+      <p class="folder-form-error" *ngIf="folderDialogError">{{ folderDialogError }}</p>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-actions">
+        <p-button label="Odustani" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="closeFolderDialog()"></p-button>
+        <p-button
+          [label]="folderDialogSubmitting ? 'Cuvanje...' : 'Sacuvaj'"
+          [icon]="folderDialogSubmitting ? 'pi pi-spin pi-spinner' : 'pi pi-check'"
+          [disabled]="folderDialogSubmitting"
+          (onClick)="submitFolderDialog()"></p-button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog
+    [(visible)]="deleteFolderDialogVisible"
+    [modal]="true"
+    [style]="{ width: '32rem' }"
+    header="Potvrda brisanja foldera"
+    [draggable]="false"
+    [resizable]="false"
+    (onHide)="cancelDeleteFolderDialog()">
+    <div class="text-center py-4">
+      <i class="pi pi-exclamation-triangle text-red-500" style="font-size: 2.6rem"></i>
+      <p class="mt-4 font-semibold" style="font-size: 1.05rem;">
+        Da li ste sigurni da zelite da obrisete folder "{{ pendingFolderDeleteName }}"?
+      </p>
+      <p class="text-sm text-gray-500 mt-2">
+        Dokumenti iz ovog foldera bice premesteni u root.
+      </p>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-actions">
+        <p-button label="Odustani" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="cancelDeleteFolderDialog()"></p-button>
+        <p-button
+          [label]="deletingFolderId ? 'Brisanje...' : 'Obrisi folder'"
+          [icon]="deletingFolderId ? 'pi pi-spin pi-spinner' : 'pi pi-trash'"
+          severity="danger"
+          [disabled]="deletingFolderId != null"
+          (onClick)="confirmDeleteFolder()"></p-button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog
+    [(visible)]="moveDocumentDialogVisible"
+    [modal]="true"
+    [style]="{ width: '32rem' }"
+    header="Premesti dokument u folder"
+    [draggable]="false"
+    [resizable]="false"
+    (onHide)="cancelMoveDocumentDialog()">
+    <div class="folder-dialog-body">
+      <p class="mb-3">Dokument: <strong>{{ pendingDocumentMoveName }}</strong></p>
+      <div class="folder-form-group">
+        <label>Izaberite folder</label>
+        <select class="folder-select" [(ngModel)]="moveDocumentTargetFolderId">
+          <option value="__root__">Root (bez foldera)</option>
+          <option *ngFor="let folder of folders" [value]="folder.id">{{ folder.name }}</option>
+        </select>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer-actions">
+        <p-button label="Odustani" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="cancelMoveDocumentDialog()"></p-button>
+        <p-button
+          [label]="movingDocumentId ? 'Premestanje...' : 'Premesti'"
+          [icon]="movingDocumentId ? 'pi pi-spin pi-spinner' : 'pi pi-check'"
+          [disabled]="movingDocumentId != null"
+          (onClick)="confirmMoveDocument()"></p-button>
+      </div>
+    </ng-template>
+  </p-dialog>
 </div>
+
+<ng-template #folderNode let-folder="folder">
+  <li class="folder-node">
+    <div class="folder-node-row" [class.active]="folderSelectionMode === 'folder' && selectedFolderId === folder.id" (click)="selectFolder(folder.id)">
+      <button
+        class="folder-toggle"
+        *ngIf="hasChildren(folder.id)"
+        (click)="toggleFolder(folder.id, $event)">
+        <i class="pi" [class.pi-chevron-right]="!isExpanded(folder.id)" [class.pi-chevron-down]="isExpanded(folder.id)"></i>
+      </button>
+      <span class="folder-toggle-spacer" *ngIf="!hasChildren(folder.id)"></span>
+      <i class="pi pi-folder folder-icon"></i>
+      <span class="folder-name">{{ folder.name }}</span>
+      <span class="folder-count">{{ folder.documentsCount }}</span>
+    </div>
+
+    <ul class="folder-list child-list" *ngIf="hasChildren(folder.id) && isExpanded(folder.id)">
+      <ng-container *ngFor="let child of getChildFolders(folder.id)">
+        <ng-container [ngTemplateOutlet]="folderNode" [ngTemplateOutletContext]="{ folder: child }"></ng-container>
+      </ng-container>
+    </ul>
+  </li>
+</ng-template>

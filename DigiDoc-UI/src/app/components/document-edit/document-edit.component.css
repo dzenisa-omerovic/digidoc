@@ -1,0 +1,274 @@
+:host {
+  display: block;
+}
+
+.word-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 80px);
+  background: #f3f4f6;
+  margin-top: 20px;
+}
+
+.word-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1.5rem;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.document-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.doc-title-input {
+  border: none;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: transparent;
+  outline: none;
+  min-width: 360px;
+}
+
+.doc-title-input:hover,
+.doc-title-input:focus {
+  background: #f3f4f6;
+}
+
+.doc-desc-input {
+  border: none;
+  font-size: 0.85rem;
+  color: #6b7280;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: transparent;
+  outline: none;
+}
+
+.doc-desc-input:hover,
+.doc-desc-input:focus {
+  background: #f3f4f6;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.editor-toolbar-shell {
+  padding: 0.35rem 1.5rem 0.45rem;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.editor-toolbar-row {
+  width: min(1600px, calc(100vw - 3rem));
+  margin: 0 auto;
+  border: 1px solid #d9dee7;
+  border-radius: 10px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  overflow: visible;
+  white-space: normal;
+  padding: 0.45rem 0.6rem;
+  gap: 0.45rem;
+}
+
+.editor-toolbar-row > * {
+  flex: 0 0 auto;
+}
+
+:host ::ng-deep .editor-toolbar-row .ql-formats {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  margin-right: 0.45rem;
+  padding-right: 0.45rem;
+  border-right: 1px solid #edf1f6;
+}
+
+:host ::ng-deep .editor-toolbar-row .ql-formats:last-child {
+  border-right: none;
+  margin-right: 0;
+  padding-right: 0;
+}
+
+:host ::ng-deep .editor-toolbar-row .ql-picker {
+  font-size: 0.85rem;
+  z-index: 20;
+}
+
+:host ::ng-deep .editor-toolbar-row .ql-picker-options {
+  z-index: 9999;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.content-grid {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.word-workspace {
+  flex: 1;
+  padding: 0.75rem 0 3rem;
+  display: flex;
+  justify-content: center;
+}
+
+.a4-page-container {
+  width: 21cm;
+  min-height: 29.7cm;
+  background: #ffffff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.04);
+  margin: 0 auto;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+:host ::ng-deep .a4-page-container .p-editor-container {
+  border: none !important;
+}
+
+:host ::ng-deep .a4-page-container .p-editor-toolbar {
+  display: none !important;
+}
+
+:host ::ng-deep .a4-page-container .p-editor-content {
+  border: none !important;
+}
+
+:host ::ng-deep .a4-page-container .p-editor-content .ql-editor {
+  padding: 2.5cm !important;
+  font-family: "Times New Roman", serif;
+  font-size: 12pt;
+  line-height: 1.5;
+  color: #000000;
+  min-height: 29.7cm;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+:host ::ng-deep .a4-page-container .p-editor-content .ql-editor.ql-blank::before {
+  left: 2.5cm;
+  font-style: normal;
+  color: #9ca3af;
+}
+
+.state-box {
+  margin: 1rem 1.5rem;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.state-box.error {
+  color: #991b1b;
+}
+
+:host ::ng-deep .primary-action.p-button {
+  background: #2563eb;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1.2rem;
+  font-weight: 500;
+}
+
+:host ::ng-deep .primary-action.p-button:hover {
+  background: #1d4ed8;
+}
+
+.comparison-dialog p {
+  margin: 0 0 14px;
+  color: #64748b;
+}
+
+.compare-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.version-card {
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.version-card h3 {
+  margin: 0;
+  padding: 10px 12px;
+  background: #e8eef8;
+  border-bottom: 1px solid #dbe3ee;
+  font-size: 0.92rem;
+}
+
+.version-html {
+  min-height: 520px;
+  max-height: 72vh;
+  overflow: auto;
+  background: #ffffff;
+  padding: 16px;
+}
+
+.version-document {
+  color: #0f172a;
+  line-height: 1.6;
+  font-family: "Times New Roman", serif;
+}
+
+:host ::ng-deep .version-document .diff-removed-word {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 4px;
+  padding: 0 1px;
+}
+
+:host ::ng-deep .version-document .diff-added-word {
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 4px;
+  padding: 0 1px;
+}
+
+@media (max-width: 1100px) {
+  .compare-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .word-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .doc-title-input {
+    min-width: 0;
+    width: 100%;
+  }
+}

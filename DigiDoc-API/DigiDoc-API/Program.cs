@@ -13,6 +13,8 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<TemplateService>();
 builder.Services.AddScoped<DocumentService>();
+builder.Services.AddScoped<OrganizationService>();
+builder.Services.AddScoped<FolderService>();
 builder.Services.AddDbContext<DataContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );

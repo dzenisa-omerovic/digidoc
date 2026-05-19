@@ -37,7 +37,7 @@
   display: block;
 }
 
-::ng-deep .p-inputtext, ::ng-deep .p-password, ::ng-deep .p-password input, ::ng-deep .p-datepicker { width: 100% !important; }
+::ng-deep .p-inputtext, ::ng-deep .p-password, ::ng-deep .p-password input, ::ng-deep .p-datepicker, ::ng-deep .p-select { width: 100% !important; }
 
 .position-relative {
   position: relative;
@@ -105,6 +105,19 @@
 
 .button-container { margin-top: 1rem; border-top: 4px solid #f1f5f9; padding-top: 2rem; }
 ::ng-deep .button-container .p-button { width: 100%; justify-content: center; padding: 1rem; border-radius: 8px; font-weight: 600; font-size: 1.1rem; }
+.registration-mode-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.registration-mode-buttons .p-button {
+  flex: 1 1 240px;
+}
+.p-hint {
+  color: #64748b;
+  font-size: 0.78rem;
+  margin-top: 0.45rem;
+}
 .radio-wrapper {
   display: flex;
   align-items: center;

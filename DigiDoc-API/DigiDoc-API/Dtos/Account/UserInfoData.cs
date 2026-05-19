@@ -13,6 +13,13 @@ public class UserInfoData
     public string Jmbg { get; set; } = string.Empty;
     public string JobTitle { get; set; } = string.Empty;
     public string Company { get; set; } = string.Empty;
+    public Guid? OrganizationId { get; set; }
+    public string OrganizationName { get; set; } = string.Empty;
+    public bool IsApproved { get; set; }
+    public bool IsOrganizationApproved { get; set; }
+    public bool IsOrganizationCreationRequest { get; set; }
+    public bool IsOrgAdmin { get; set; }
+    public string Role { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
     

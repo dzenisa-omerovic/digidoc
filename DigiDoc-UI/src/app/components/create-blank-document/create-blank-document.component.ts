@@ -28,6 +28,8 @@ interface FloatingTextBox {
 export class CreateBlankDocumentComponent {
   private quillEditor?: any;
   private nextTextBoxId = 1;
+  readonly pageHeightPx = 1123;
+  pageCount = 1;
   @ViewChild('floatingLayer') floatingLayerRef?: ElementRef<HTMLElement>;
   private dragSession?: {
     id: number;
@@ -51,6 +53,14 @@ export class CreateBlankDocumentComponent {
   readonly editorModules = {
     toolbar: '#blank-doc-toolbar'
   };
+
+  get pageIndexes(): number[] {
+    return Array.from({ length: this.pageCount }, (_, index) => index);
+  }
+
+  get editorCanvasHeight(): number {
+    return this.pageCount * this.pageHeightPx;
+  }
 
   get textBoxZoneHeight(): number {
     if (this.floatingTextBoxes.length === 0) {
@@ -122,14 +132,27 @@ export class CreateBlankDocumentComponent {
 
   onEditorInit(event: any) {
     this.quillEditor = event.editor ?? event.instance ?? event;
-    const bodyHtml = this.getEditorBodyHtml();
+    const bodyHtml = this.removeTablesFromHtml(this.getEditorBodyHtml());
     if (!this.editorContent && bodyHtml) {
       this.editorContent = bodyHtml;
     }
+    setTimeout(() => this.recalculatePageCount());
   }
 
   onEditorContentChange(content: string) {
-    this.editorContent = content ?? '';
+    const rawContent = content ?? '';
+    const sanitizedContent = this.removeTablesFromHtml(rawContent);
+
+    if (sanitizedContent !== rawContent) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Tabela nije dozvoljena',
+        detail: 'U blank dokumentu nije dozvoljeno ubacivanje tabela.'
+      });
+    }
+
+    this.editorContent = sanitizedContent;
+    setTimeout(() => this.recalculatePageCount());
   }
 
   goBack() {
@@ -160,6 +183,7 @@ export class CreateBlankDocumentComponent {
 
     this.floatingTextBoxes = [...this.floatingTextBoxes, box];
     this.activeTextBoxId = box.id;
+    this.recalculatePageCount();
   }
 
   removeFloatingTextBox(id: number) {
@@ -167,6 +191,7 @@ export class CreateBlankDocumentComponent {
     if (this.activeTextBoxId === id) {
       this.activeTextBoxId = undefined;
     }
+    this.recalculatePageCount();
   }
 
   @HostListener('document:pointerdown', ['$event'])
@@ -202,6 +227,14 @@ export class CreateBlankDocumentComponent {
       target?.isContentEditable;
 
     if (typingInInput) {
+      const activeBox = this.floatingTextBoxes.find((box) => box.id === this.activeTextBoxId);
+      const isActiveBoxEmpty = !activeBox?.text || activeBox.text.trim().length === 0;
+
+      if (isActiveBoxEmpty) {
+        event.preventDefault();
+        this.removeFloatingTextBox(this.activeTextBoxId);
+      }
+
       return;
     }
 
@@ -323,6 +356,7 @@ export class CreateBlankDocumentComponent {
     }
 
     this.floatingTextBoxes = [...this.floatingTextBoxes];
+    this.recalculatePageCount();
     this.cdr.detectChanges();
   };
 
@@ -341,25 +375,9 @@ export class CreateBlankDocumentComponent {
     this.updateTextBox(id, { text });
   }
 
-  insertTableBlock() {
-    this.insertBlock(`
-      <table class="custom-table">
-        <tbody>
-          <tr>
-            <td>Kolona 1</td>
-            <td>Kolona 2</td>
-          </tr>
-          <tr>
-            <td>Podatak 1</td>
-            <td>Podatak 2</td>
-          </tr>
-        </tbody>
-      </table>
-      <p><br></p>
-    `);
-  }
-
   saveDocument() {
+    this.editorContent = this.removeTablesFromHtml(this.getEditorBodyHtml());
+
     if (!this.documentTitle.trim() || !this.editorContent.trim() || this.editorContent === '<p><br></p>') {
       this.messageService.add({
         severity: 'warn',
@@ -405,8 +423,10 @@ export class CreateBlankDocumentComponent {
   }
 
   private buildDocumentContentWithTextBoxes(): string {
+    const sanitizedEditorContent = this.removeTablesFromHtml(this.editorContent);
+
     if (this.floatingTextBoxes.length === 0) {
-      return this.editorContent;
+      return sanitizedEditorContent;
     }
 
     const textBoxesHtml = this.floatingTextBoxes
@@ -438,7 +458,7 @@ export class CreateBlankDocumentComponent {
         ${textBoxesHtml}
       </div>
       <div>
-        ${this.editorContent}
+        ${sanitizedEditorContent}
       </div>
     `;
   }
@@ -456,11 +476,46 @@ export class CreateBlankDocumentComponent {
     this.quillEditor.clipboard.dangerouslyPasteHTML(index, html, 'user');
     this.quillEditor.setSelection(index + 1, 0, 'user');
     this.editorContent = this.getEditorBodyHtml();
+    setTimeout(() => this.recalculatePageCount());
   }
 
   private getEditorBodyHtml(): string {
     const editorRoot = this.quillEditor?.root as HTMLElement | undefined;
     return editorRoot ? editorRoot.innerHTML : this.editorContent;
+  }
+
+  private removeTablesFromHtml(content: string): string {
+    if (!content) {
+      return '';
+    }
+
+    if (typeof DOMParser === 'undefined') {
+      return content.replace(/<table[\s\S]*?<\/table>/gi, '');
+    }
+
+    const parser = new DOMParser();
+    const parsed = parser.parseFromString(`<div>${content}</div>`, 'text/html');
+    const wrapper = parsed.body.firstElementChild as HTMLElement | null;
+
+    if (!wrapper) {
+      return content.replace(/<table[\s\S]*?<\/table>/gi, '');
+    }
+
+    wrapper.querySelectorAll('table').forEach((table) => table.remove());
+    return wrapper.innerHTML;
+  }
+
+  private recalculatePageCount(): void {
+    const editorRoot = this.quillEditor?.root as HTMLElement | undefined;
+    const editorHeight = editorRoot?.scrollHeight ?? this.pageHeightPx;
+    const floatingHeight = this.textBoxZoneHeight > 0 ? this.textBoxZoneHeight + 180 : 0;
+    const requiredHeight = Math.max(this.pageHeightPx, editorHeight, floatingHeight);
+    const nextPageCount = Math.max(1, Math.ceil(requiredHeight / this.pageHeightPx));
+
+    if (nextPageCount !== this.pageCount) {
+      this.pageCount = nextPageCount;
+      this.cdr.detectChanges();
+    }
   }
 
   private escapeHtml(value: string): string {

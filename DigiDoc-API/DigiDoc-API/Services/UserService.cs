@@ -16,6 +16,7 @@ public class UserService
         _context = context;
         _userManager = userManager;
     }
+
     public async Task<UserDeletedDto> DeleteAccountAsync(Guid userId)
     {
         var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -23,14 +24,47 @@ public class UserService
         {
             throw new Exception("User not found.");
         }
-        
-        var result = await _userManager.DeleteAsync(user);
-        if (!result.Succeeded)
-        {
-            throw new Exception("Greška prilikom brisanja korisnika: " + string.Join(", ", result.Errors.Select(e => e.Description)));
-        }
 
-        await _context.SaveChangesAsync();
+        var userDocuments = await _context.Documents
+            .Where(d => d.CreatedByUserId == userId)
+            .ToListAsync();
+
+        var userTemplates = await _context.Templates
+            .Where(t => t.CreatedByUserId == userId)
+            .ToListAsync();
+
+        var userVersions = await _context.DocumentVersions
+            .Where(v => v.CreatedByUserId == userId)
+            .ToListAsync();
+
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            if (userVersions.Count > 0)
+            {
+                _context.DocumentVersions.RemoveRange(userVersions);
+            }
+
+            if (userDocuments.Count > 0)
+            {
+                _context.Documents.RemoveRange(userDocuments);
+            }
+
+            if (userTemplates.Count > 0)
+            {
+                _context.Templates.RemoveRange(userTemplates);
+            }
+
+            _context.Users.Remove(user);
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
 
         return new UserDeletedDto
         {
@@ -38,9 +72,12 @@ public class UserService
             Email = user.Email!
         };
     }
+
     public async Task<List<UserInfoData>> GetAllUsersAsync()
     {
-        var users = await _userManager.Users.ToListAsync();
+        var users = await _userManager.Users
+            .Include(u => u.Organization)
+            .ToListAsync();
 
         return users.Select(user => new UserInfoData
         {
@@ -51,8 +88,15 @@ public class UserService
             Name = user.Name,
             Surname = user.Surname,
             DateOfBirth = user.DateOfBirth,
-            IsFemale = user.IsFemale ?? false
+            IsFemale = user.IsFemale ?? false,
+            Company = user.Organization?.Name ?? user.Company ?? string.Empty,
+            OrganizationId = user.OrganizationId,
+            OrganizationName = user.Organization?.Name ?? string.Empty,
+            IsApproved = user.IsApproved,
+            IsOrganizationApproved = false,
+            IsOrganizationCreationRequest = false,
+            IsOrgAdmin = false,
+            Role = string.Empty
         }).ToList();
     }
-
 }

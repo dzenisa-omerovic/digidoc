@@ -90,6 +90,7 @@
   border-radius: 10px;
   background: #ffffff;
   display: flex;
+  justify-content: center;
   align-items: center;
   flex-wrap: wrap;
   overflow: visible;
@@ -181,20 +182,55 @@
 
 .a4-page-container {
   width: 21cm;
-  min-height: 29.7cm;
-  background: #ffffff;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.04);
+  min-height: var(--editor-canvas-height, 29.7cm);
+  background: transparent;
+  box-shadow: none;
   margin: 0 auto;
-  border-radius: 10px;
+  border-radius: 0;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+  --single-page-height: 29.7cm;
   --textbox-top-offset: 0px;
   --textbox-left-offset: 0px;
   --textbox-right-offset: 0px;
 }
 
+:host ::ng-deep .a4-page-container > .editor-layer {
+  position: relative;
+  z-index: 2;
+}
+
+.page-stack {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.page-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--single-page-height);
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.1), 0 3px 6px rgba(15, 23, 42, 0.06);
+  border: 1px solid #e5e7eb;
+}
+
+.page-label {
+  position: absolute;
+  right: 18px;
+  bottom: 14px;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 :host ::ng-deep .a4-page-container .p-editor-container {
   border: none !important;
+  background: transparent;
 }
 
 :host ::ng-deep .a4-page-container .p-editor-toolbar {
@@ -211,11 +247,12 @@
     calc(2.5cm + var(--textbox-right-offset))
     2.5cm
     calc(2.5cm + var(--textbox-left-offset)) !important;
+  background: transparent;
   font-family: "Times New Roman", serif;
   font-size: 12pt;
   line-height: 1.5;
   color: #000000;
-  min-height: 29.7cm;
+  min-height: var(--editor-canvas-height);
   overflow-wrap: anywhere;
   word-break: break-word;
 }
@@ -226,26 +263,13 @@
   color: #9ca3af;
 }
 
-:host ::ng-deep .a4-page-container .p-editor-content .ql-editor .custom-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1.5rem 0;
-}
-
-:host ::ng-deep .a4-page-container .p-editor-content .ql-editor .custom-table td,
-:host ::ng-deep .a4-page-container .p-editor-content .ql-editor .custom-table th {
-  border: 1px solid #d1d5db;
-  padding: 0.5rem;
-  text-align: left;
-}
-
 .floating-layer {
   position: absolute;
   top: 2.5cm;
   left: 2.5cm;
   right: 2.5cm;
   pointer-events: none;
-  z-index: 3;
+  z-index: 4;
 }
 
 .floating-textbox {

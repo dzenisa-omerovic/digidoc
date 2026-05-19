@@ -1,11 +1,11 @@
 <div class="dashboard-container" *ngIf="!isLoadingUser && userData">
   <aside class="sidebar">
     <div class="sidebar-header">
-      <i class="pi pi-user-edit"></i>
-      <span>Moj nalog</span>
+      <i class="pi" [ngClass]="(isAdmin || isOrgAdmin) ? 'pi-shield' : 'pi-user-edit'"></i>
+      <span>{{ (isAdmin || isOrgAdmin) ? 'Admin panel' : 'Moj nalog' }}</span>
     </div>
 
-    <nav class="sidebar-nav">
+    <nav class="sidebar-nav" *ngIf="!isAdmin && !isOrgAdmin">
       <button (click)="setActiveTab('osnovno')" [class.active]="activeTab === 'osnovno'">
         <i class="pi pi-id-card"></i> Osnovne informacije
       </button>
@@ -27,6 +27,16 @@
       </button>
     </nav>
 
+    <nav class="sidebar-nav" *ngIf="isAdmin || isOrgAdmin">
+      <button (click)="setActiveTab('admin-users')" [class.active]="activeTab === 'admin-users'">
+        <i class="pi pi-users"></i> Korisnici
+      </button>
+
+      <button *ngIf="isAdmin" (click)="setActiveTab('admin-organizations')" [class.active]="activeTab === 'admin-organizations'">
+        <i class="pi pi-building"></i> Organizacije
+      </button>
+    </nav>
+
     <div class="sidebar-footer">
       <button class="btn-logout" (click)="logout()">
         <i class="pi pi-sign-out"></i> Odjavi se
@@ -35,7 +45,160 @@
   </aside>
 
   <main class="main-content">
-    <form [formGroup]="updateForm" (ngSubmit)="onUpdate()">
+    <section class="tab-section admin-section" *ngIf="(isAdmin || isOrgAdmin) && activeTab === 'admin-users'">
+      <div class="tab-title-row">
+        <div class="title-block">
+          <h2>Korisnici</h2>
+          <p class="tab-desc" *ngIf="isAdmin">Pregled korisnika i odobravanje novih naloga.</p>
+          <p class="tab-desc" *ngIf="isOrgAdmin">Pregled korisnika iz vase organizacije i odobravanje zahteva za pridruzivanje.</p>
+        </div>
+        <p-button label="Osvezi" icon="pi pi-refresh" styleClass="create-button" (onClick)="loadAdminUsers()"></p-button>
+      </div>
+
+      <div class="collection-state" *ngIf="loadingAdminUsers">
+        <i class="pi pi-spin pi-spinner"></i>
+        <p>Ucitavanje korisnika...</p>
+      </div>
+
+      <div class="collection-state error" *ngIf="!loadingAdminUsers && adminUsersLoadError">
+        <i class="pi pi-exclamation-triangle"></i>
+        <p>Neuspesno ucitavanje korisnika.</p>
+        <p-button label="Pokusaj ponovo" styleClass="p-button-outlined" (onClick)="loadAdminUsers()"></p-button>
+      </div>
+
+      <div class="collection-state" *ngIf="!loadingAdminUsers && !adminUsersLoadError && adminUsers.length === 0">
+        <i class="pi pi-users"></i>
+        <p>Trenutno nema korisnika za prikaz.</p>
+      </div>
+
+      <div class="admin-block" *ngIf="isAdmin && !loadingAdminUsers && !adminUsersLoadError && pendingOrganizationRequests.length > 0">
+        <h3>Zahtevi za novu organizaciju i AdminOrg nalog</h3>
+        <div class="admin-list">
+          <article class="admin-item" *ngFor="let user of pendingOrganizationRequests">
+            <div class="admin-item-main">
+              <strong>{{ user.name }} {{ user.surname }}</strong>
+              <span>{{ user.username }} | {{ user.email }}</span>
+              <small *ngIf="user.organizationName">{{ getOrganizationLabel(user) }}: {{ user.organizationName }}</small>
+            </div>
+            <div class="admin-actions">
+              <p-button label="Potvrdi" icon="pi pi-check" styleClass="action-button open-button" (onClick)="approveUser(user.id)"></p-button>
+              <p-button label="Odbij" icon="pi pi-times" styleClass="action-button reject-button" (onClick)="rejectPendingUser(user.id)"></p-button>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="admin-block" *ngIf="isAdmin && !loadingAdminUsers && !adminUsersLoadError && pendingGlobalApprovalUsers.length > 0">
+        <h3>Zahtevi za naloge (cekaju glavnog administratora)</h3>
+        <div class="admin-list">
+          <article class="admin-item" *ngFor="let user of pendingGlobalApprovalUsers">
+            <div class="admin-item-main">
+              <strong>{{ user.name }} {{ user.surname }}</strong>
+              <span>{{ user.username }} | {{ user.email }}</span>
+              <small *ngIf="user.organizationName">{{ getOrganizationLabel(user) }}: {{ user.organizationName }}</small>
+            </div>
+            <div class="admin-actions">
+              <p-button label="Odobri" icon="pi pi-check" styleClass="action-button open-button" (onClick)="approveUser(user.id)"></p-button>
+              <p-button label="Odbij" icon="pi pi-times" styleClass="action-button reject-button" (onClick)="rejectPendingUser(user.id)"></p-button>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="admin-block" *ngIf="!loadingAdminUsers && !adminUsersLoadError && pendingOrganizationUsers.length > 0">
+        <h3>{{ isAdmin ? 'Cekaju odobrenje admina organizacije' : 'Zahtevi za pridruzivanje organizaciji' }}</h3>
+        <div class="admin-list">
+          <article class="admin-item" *ngFor="let user of pendingOrganizationUsers">
+            <div class="admin-item-main">
+              <strong>{{ user.name }} {{ user.surname }}</strong>
+              <span>{{ user.username }} | {{ user.email }}</span>
+              <small *ngIf="user.organizationName">{{ getOrganizationLabel(user) }}: {{ user.organizationName }}</small>
+            </div>
+            <div class="admin-actions">
+              <p-button
+                *ngIf="isOrgAdmin"
+                label="Potvrdi"
+                icon="pi pi-check"
+                styleClass="action-button open-button"
+                (onClick)="approveUser(user.id)"></p-button>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="admin-block" *ngIf="!loadingAdminUsers && !adminUsersLoadError && approvedUsers.length > 0">
+        <h3>{{ isAdmin ? 'Aktivni korisnici' : 'Aktivni korisnici organizacije' }}</h3>
+        <div class="admin-list">
+          <article class="admin-item" *ngFor="let user of approvedUsers">
+            <div class="admin-item-main">
+              <strong>{{ user.name }} {{ user.surname }}</strong>
+              <span>{{ user.username }} | {{ user.email }}</span>
+              <small *ngIf="user.organizationName">{{ getOrganizationLabel(user) }}: {{ user.organizationName }}</small>
+            </div>
+            <div class="admin-actions">
+              <p-button
+                *ngIf="isAdmin"
+                label="Obrisi"
+                icon="pi pi-trash"
+                styleClass="action-button edit-button"
+                (onClick)="deleteUserByAdmin(user.id)"></p-button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab-section admin-section" *ngIf="isAdmin && activeTab === 'admin-organizations'">
+      <div class="tab-title-row">
+        <div class="title-block">
+          <h2>Organizacije</h2>
+          <p class="tab-desc">Lista registrovanih organizacija.</p>
+        </div>
+        <p-button label="Osvezi" icon="pi pi-refresh" styleClass="create-button" (onClick)="loadAdminOrganizations()"></p-button>
+      </div>
+
+      <div class="collection-state" *ngIf="loadingAdminOrganizations">
+        <i class="pi pi-spin pi-spinner"></i>
+        <p>Ucitavanje organizacija...</p>
+      </div>
+
+      <div class="collection-state error" *ngIf="!loadingAdminOrganizations && adminOrganizationsLoadError">
+        <i class="pi pi-exclamation-triangle"></i>
+        <p>Neuspesno ucitavanje organizacija.</p>
+        <p-button label="Pokusaj ponovo" styleClass="p-button-outlined" (onClick)="loadAdminOrganizations()"></p-button>
+      </div>
+
+      <div class="collection-state" *ngIf="!loadingAdminOrganizations && !adminOrganizationsLoadError && adminOrganizations.length === 0">
+        <i class="pi pi-building"></i>
+        <p>Trenutno nema organizacija za prikaz.</p>
+      </div>
+
+      <div class="admin-list organizations-list" *ngIf="!loadingAdminOrganizations && !adminOrganizationsLoadError && adminOrganizations.length > 0">
+        <article class="admin-item organization-item" *ngFor="let organization of adminOrganizations">
+          <div class="admin-item-main">
+            <strong>{{ organization.name }}</strong>
+            <span>AdminOrg: {{ organization.adminOrgUsername || 'Nije dodeljen' }}</span>
+            <small *ngIf="organization.establishedAt">Osnovana: {{ organization.establishedAt | date:'dd.MM.yyyy.' }}</small>
+            <small *ngIf="organization.activityDescription">Delatnost: {{ organization.activityDescription }}</small>
+            <small>
+              Admin korisnik: {{ organization.adminUsersCount ?? 0 }} |
+              Radnici: {{ organization.workersCount ?? 0 }} |
+              Ukupno: {{ organization.totalUsersCount ?? 0 }}
+            </small>
+          </div>
+          <div class="admin-actions">
+            <p-button
+              [label]="isDeletingOrganization(organization.id) ? 'Brisanje...' : 'Obrisi'"
+              [icon]="isDeletingOrganization(organization.id) ? 'pi pi-spin pi-spinner' : 'pi pi-trash'"
+              styleClass="action-button delete-button"
+              [disabled]="isDeletingOrganization(organization.id)"
+              (onClick)="openDeleteOrganizationDialog(organization)"></p-button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <form [formGroup]="updateForm" (ngSubmit)="onUpdate()" *ngIf="!isAdmin && !isOrgAdmin">
       <section class="tab-section" *ngIf="activeTab === 'osnovno'">
         <h2>Osnovne informacije</h2>
         <p class="tab-desc">Vasi licni podaci i podesavanja profila.</p>
@@ -79,8 +242,8 @@
             <input pInputText formControlName="jobTitle" />
           </div>
           <div class="form-group">
-            <label>Kompanija</label>
-            <input pInputText formControlName="company" />
+            <label>Organization</label>
+            <div class="readonly-field">{{ organizationDisplayName }}</div>
           </div>
           <div class="form-group">
             <label>Grad i adresa</label>
@@ -149,11 +312,21 @@
                 <i class="pi pi-calendar"></i>
                 {{ template.createdAt | date:'dd.MM.yyyy.' }}
               </span>
+              <span>
+                <i class="pi pi-building"></i>
+                {{ getTemplateOrganizationName(template) }}
+              </span>
             </div>
 
             <div class="card-actions">
               <p-button label="Popuni" icon="pi pi-file-edit" styleClass="action-button fill-button" (onClick)="openTemplateFill(template.id); $event.stopPropagation()"></p-button>
               <p-button label="Uredi" icon="pi pi-pencil" styleClass="action-button edit-button" (onClick)="openTemplateEdit(template.id); $event.stopPropagation()"></p-button>
+              <p-button
+                label="Obrisi"
+                [icon]="isDeletingTemplate(template.id) ? 'pi pi-spin pi-spinner' : 'pi pi-trash'"
+                styleClass="action-button delete-button"
+                [disabled]="isDeletingTemplate(template.id)"
+                (onClick)="deleteTemplate(template, $event)"></p-button>
             </div>
           </article>
         </div>
@@ -202,11 +375,25 @@
                 <i class="pi pi-calendar"></i>
                 {{ document.createdAt | date:'dd.MM.yyyy.' }}
               </span>
+              <span class="card-creator">
+                <i class="pi pi-user"></i>
+                {{ getCreatorName(document) }}
+              </span>
+              <span>
+                <i class="pi pi-building"></i>
+                {{ getDocumentOrganizationName(document) }}
+              </span>
             </div>
 
             <div class="card-actions">
               <p-button label="Otvori" icon="pi pi-eye" styleClass="action-button open-button" (onClick)="openDocument(document.id); $event.stopPropagation()"></p-button>
               <p-button label="Uredi" icon="pi pi-pencil" styleClass="action-button edit-button" (onClick)="openDocumentEdit(document.id); $event.stopPropagation()"></p-button>
+              <p-button
+                label="Obrisi"
+                [icon]="isDeletingDocument(document.id) ? 'pi pi-spin pi-spinner' : 'pi pi-trash'"
+                styleClass="action-button delete-button"
+                [disabled]="isDeletingDocument(document.id)"
+                (onClick)="deleteDocument(document, $event)"></p-button>
             </div>
           </article>
         </div>
@@ -247,6 +434,84 @@
         <p-button label="Obrisi moj nalog" icon="pi pi-trash" severity="danger" (onClick)="deleteAccountDialogVisible = true" type="button"></p-button>
       </div>
     </form>
+
+    <p-dialog
+      [(visible)]="deleteOrganizationDialogVisible"
+      [modal]="true"
+      [style]="{ width: '30rem' }"
+      header="Potvrda brisanja organizacije"
+      [draggable]="false"
+      [resizable]="false"
+      (onHide)="cancelDeleteOrganizationDialog()">
+      <div class="text-center py-4">
+        <i class="pi pi-exclamation-triangle text-red-500" style="font-size: 2.8rem"></i>
+        <p class="mt-4 font-semibold" style="font-size: 1.08rem;">
+          Da li ste sigurni da zelite da obrisete organizaciju "{{ pendingOrganizationDeleteName }}"?
+        </p>
+        <p class="text-sm text-gray-500 mt-2">
+          Bice obrisani i svi korisnici, sabloni i dokumenti povezani sa ovom organizacijom.
+        </p>
+      </div>
+
+      <ng-template pTemplate="footer">
+        <div class="flex justify-content-center gap-3 w-full pb-3">
+          <p-button
+            label="Odustani"
+            icon="pi pi-times"
+            [text]="true"
+            severity="secondary"
+            (onClick)="cancelDeleteOrganizationDialog()"
+            styleClass="p-button-lg">
+          </p-button>
+
+          <p-button
+            label="Obrisi organizaciju"
+            icon="pi pi-trash"
+            severity="danger"
+            (onClick)="confirmDeleteOrganization()"
+            styleClass="p-button-lg">
+          </p-button>
+        </div>
+      </ng-template>
+    </p-dialog>
+
+    <p-dialog
+      [(visible)]="deleteItemDialogVisible"
+      [modal]="true"
+      [style]="{ width: '30rem' }"
+      header="Potvrda brisanja"
+      [draggable]="false"
+      [resizable]="false"
+      (onHide)="cancelDeleteItem()">
+      <div class="text-center py-4">
+        <i class="pi pi-exclamation-triangle text-red-500" style="font-size: 2.8rem"></i>
+        <p class="mt-4 font-semibold" style="font-size: 1.08rem;">
+          Da li ste sigurni da zelite da obrisete {{ pendingDeleteItemTypeLabel }} "{{ pendingDeleteItemLabel }}"?
+        </p>
+        <p class="text-sm text-gray-500 mt-2">Ova akcija je trajna i ne moze se ponistiti.</p>
+      </div>
+
+      <ng-template pTemplate="footer">
+        <div class="flex justify-content-center gap-3 w-full pb-3">
+          <p-button
+            label="Odustani"
+            icon="pi pi-times"
+            [text]="true"
+            severity="secondary"
+            (onClick)="cancelDeleteItem()"
+            styleClass="p-button-lg">
+          </p-button>
+
+          <p-button
+            [label]="'Obrisi ' + pendingDeleteItemTypeLabel"
+            icon="pi pi-trash"
+            severity="danger"
+            (onClick)="confirmDeleteItem()"
+            styleClass="p-button-lg">
+          </p-button>
+        </div>
+      </ng-template>
+    </p-dialog>
 
     <p-dialog
       [(visible)]="deleteAccountDialogVisible"

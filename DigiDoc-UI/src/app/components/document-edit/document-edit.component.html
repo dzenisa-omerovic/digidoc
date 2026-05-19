@@ -1,0 +1,129 @@
+<div class="word-layout">
+  <div class="word-header">
+    <div class="header-left">
+      <div class="document-info">
+        <input id="docTitle" type="text" [(ngModel)]="documentTitle" placeholder="Ime dokumenta" class="doc-title-input" />
+        <input id="docDescription" type="text" [(ngModel)]="documentDescription" placeholder="Opciona napomena..." class="doc-desc-input" />
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button pButton type="button" label="Nazad na dokument" class="p-button-outlined" icon="pi pi-eye" (click)="openDocument()"></button>
+      <button pButton type="button" label="Sacuvaj novu verziju" icon="pi pi-save" [loading]="saving" class="primary-action" (click)="saveChanges()"></button>
+    </div>
+  </div>
+
+  <div class="state-box" *ngIf="loading">
+    <i class="pi pi-spin pi-spinner"></i>
+    <span>Ucitavanje dokumenta...</span>
+  </div>
+
+  <div class="state-box error" *ngIf="!loading && error">
+    <i class="pi pi-exclamation-triangle"></i>
+    <span>{{ error }}</span>
+  </div>
+
+  <div class="content-grid" *ngIf="!loading && !error">
+    <div class="editor-toolbar-shell">
+      <div id="document-edit-toolbar" class="editor-toolbar-row ql-snow ql-toolbar">
+        <span class="ql-formats">
+          <select class="ql-header">
+            <option selected></option>
+            <option value="1"></option>
+            <option value="2"></option>
+            <option value="3"></option>
+          </select>
+          <select class="ql-font">
+            <option selected></option>
+            <option value="serif"></option>
+            <option value="monospace"></option>
+          </select>
+          <select class="ql-size">
+            <option value="small"></option>
+            <option selected></option>
+            <option value="large"></option>
+            <option value="huge"></option>
+          </select>
+        </span>
+
+        <span class="ql-formats">
+          <button type="button" class="ql-bold"></button>
+          <button type="button" class="ql-italic"></button>
+          <button type="button" class="ql-underline"></button>
+          <button type="button" class="ql-strike"></button>
+        </span>
+
+        <span class="ql-formats">
+          <select class="ql-color"></select>
+          <select class="ql-background"></select>
+        </span>
+
+        <span class="ql-formats">
+          <button type="button" class="ql-align" value=""></button>
+          <button type="button" class="ql-align" value="center"></button>
+          <button type="button" class="ql-align" value="right"></button>
+          <button type="button" class="ql-align" value="justify"></button>
+        </span>
+
+        <span class="ql-formats">
+          <button type="button" class="ql-list" value="ordered"></button>
+          <button type="button" class="ql-list" value="bullet"></button>
+          <button type="button" class="ql-indent" value="-1"></button>
+          <button type="button" class="ql-indent" value="+1"></button>
+        </span>
+
+        <span class="ql-formats">
+          <button type="button" class="ql-blockquote"></button>
+          <button type="button" class="ql-link"></button>
+          <button type="button" class="ql-image"></button>
+          <button type="button" class="ql-clean"></button>
+        </span>
+      </div>
+    </div>
+
+    <div class="word-workspace">
+      <div class="a4-page-container">
+      <p-editor
+        [(ngModel)]="editorContent"
+        [modules]="editorModules"
+        [style]="{'min-height':'1056px', 'border': 'none', 'padding': '0'}"
+        placeholder="Zapocnite kucanje ovde..."
+        (onInit)="onEditorInit($event)"
+        (ngModelChange)="onEditorContentChange($event)">
+      </p-editor>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p-toast></p-toast>
+
+<p-dialog
+  header="Poredjenje verzija"
+  [(visible)]="showComparisonDialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '96vw', maxWidth: '1500px' }"
+  [breakpoints]="{ '1400px': '98vw' }"
+  (onHide)="closeComparisonDialog()">
+  <div class="comparison-dialog">
+    <p>Levo je prethodna verzija, desno nova. Obojene su samo promenjene reci.</p>
+
+    <div class="compare-columns">
+      <article class="version-card">
+        <h3>{{ comparisonLeftLabel }}</h3>
+        <div class="version-html">
+          <div class="version-document" [innerHTML]="leftComparedPreview"></div>
+        </div>
+      </article>
+
+      <article class="version-card">
+        <h3>{{ comparisonRightLabel }}</h3>
+        <div class="version-html">
+          <div class="version-document" [innerHTML]="rightComparedPreview"></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</p-dialog>

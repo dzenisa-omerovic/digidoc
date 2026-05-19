@@ -6,4 +6,5 @@ public class CreateDocumentDto
     public string Description { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public int? TemplateId { get; set; }
+    public Guid? FolderId { get; set; }
 }

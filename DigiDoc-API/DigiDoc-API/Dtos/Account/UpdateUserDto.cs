@@ -14,6 +14,8 @@ public class UpdateUserDto
     public string? JobTitle { get; set; }
 
     public string? Company { get; set; }
+    
+    public Guid? OrganizationId { get; set; }
 
     public string? City { get; set; }
 

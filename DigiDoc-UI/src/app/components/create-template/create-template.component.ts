@@ -29,6 +29,7 @@ import { TemplateService } from '../../services/template.service';
 })
 export class CreateTemplateComponent implements OnInit {
   private quillEditor?: any;
+  private currentUserId = '';
 
   template: Template = {
     name: '',
@@ -56,6 +57,7 @@ export class CreateTemplateComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.currentUserId = this.getCurrentUserIdFromToken();
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       this.isEditMode = true;
@@ -67,8 +69,22 @@ export class CreateTemplateComponent implements OnInit {
   loadTemplate(id: number) {
     this.templateService.getTemplateById(id).subscribe({
       next: (data) => {
-        this.template = data;
-        this.editorContent = data.htmlContent || '';
+        if (!this.canEditLoadedTemplate(data)) {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Nedozvoljena akcija',
+            detail: 'Mozete menjati samo sablone koje ste vi kreirali.'
+          });
+          this.router.navigate(['/templates']);
+          return;
+        }
+
+        const sanitizedContent = this.removeTablesFromHtml(data.htmlContent || '');
+        this.template = {
+          ...data,
+          htmlContent: sanitizedContent
+        };
+        this.editorContent = sanitizedContent;
         
         if (this.quillEditor && this.editorContent) {
           this.quillEditor.clipboard.dangerouslyPasteHTML(0, this.editorContent);
@@ -94,8 +110,19 @@ export class CreateTemplateComponent implements OnInit {
   }
 
   onEditorContentChange(content: string) {
-    this.editorContent = content ?? '';
-    this.template.htmlContent = this.editorContent;
+    const rawContent = content ?? '';
+    const sanitizedContent = this.removeTablesFromHtml(rawContent);
+
+    if (sanitizedContent !== rawContent) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Tabela nije dozvoljena',
+        detail: 'U sablon nije dozvoljeno ubacivanje tabela.'
+      });
+    }
+
+    this.editorContent = sanitizedContent;
+    this.template.htmlContent = sanitizedContent;
     this.syncFieldsFromEditorContent();
   }
 
@@ -145,6 +172,7 @@ export class CreateTemplateComponent implements OnInit {
       return;
     }
 
+    this.editorContent = this.removeTablesFromHtml(this.editorContent);
     this.template.htmlContent = this.editorContent;
 
     const payload: Template = {
@@ -153,6 +181,16 @@ export class CreateTemplateComponent implements OnInit {
     };
 
     if (this.isEditMode && this.templateId) {
+      if (!this.canEditLoadedTemplate(this.template)) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Nedozvoljena akcija',
+          detail: 'Mozete menjati samo sablone koje ste vi kreirali.'
+        });
+        this.router.navigate(['/templates']);
+        return;
+      }
+
       this.templateService.updateTemplate(this.templateId, payload).subscribe({
         next: () => {
           this.messageService.add({
@@ -195,6 +233,39 @@ export class CreateTemplateComponent implements OnInit {
         }
       });
     }
+  }
+
+  private canEditLoadedTemplate(template: Template): boolean {
+    const ownerId = this.normalizeId(template.createdByUserId);
+    return !!this.currentUserId && !!ownerId && ownerId === this.currentUserId;
+  }
+
+  private getCurrentUserIdFromToken(): string {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return '';
+    }
+
+    try {
+      const payloadBase64 = token.split('.')[1];
+      const payload = JSON.parse(atob(payloadBase64));
+      const rawId = payload.nameid ?? payload.sub ?? payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
+      return this.normalizeId(rawId);
+    } catch {
+      return '';
+    }
+  }
+
+  private normalizeId(value: unknown): string {
+    if (typeof value === 'string') {
+      return value.trim().toLowerCase();
+    }
+
+    if (typeof value === 'number') {
+      return String(value).trim().toLowerCase();
+    }
+
+    return '';
   }
 
   private insertBlock(html: string) {
@@ -263,5 +334,26 @@ export class CreateTemplateComponent implements OnInit {
     );
 
     return Array.from(new Set([...placeholderMatches]));
+  }
+
+  private removeTablesFromHtml(content: string): string {
+    if (!content) {
+      return '';
+    }
+
+    if (typeof DOMParser === 'undefined') {
+      return content.replace(/<table[\s\S]*?<\/table>/gi, '');
+    }
+
+    const parser = new DOMParser();
+    const parsed = parser.parseFromString(`<div>${content}</div>`, 'text/html');
+    const wrapper = parsed.body.firstElementChild as HTMLElement | null;
+
+    if (!wrapper) {
+      return content.replace(/<table[\s\S]*?<\/table>/gi, '');
+    }
+
+    wrapper.querySelectorAll('table').forEach((table) => table.remove());
+    return wrapper.innerHTML;
   }
 }
